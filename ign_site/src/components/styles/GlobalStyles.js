@@ -1,0 +1,61 @@
+import { createGlobalStyle } from "styled-components"
+
+import LatoRegular from '../../assets/fonts/Lato/Lato-Regular.ttf';
+import LatoBlack from '../../assets/fonts/Lato/Lato-Black.ttf';
+import LatoBold from '../../assets/fonts/Lato/Lato-Bold.ttf';
+
+import PoppinsRegular from '../../assets/fonts/Poppins/Poppins-Regular.ttf';
+import PoppinsBlack from '../../assets/fonts/Poppins/Poppins-Black.ttf';
+import PoppinsBold from '../../assets/fonts/Poppins/Poppins-Bold.ttf';
+
+const GlobalStyles = createGlobalStyle`
+    @font-face {
+        font-family: 'Lato';
+        font-weight: 900;
+        src: local('Lato'), url(${LatoBlack}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Lato';
+        font-weight: 400;
+        src: local('Lato'), url(${LatoRegular}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Lato';
+        font-weight: 700;
+        src: local('Lato'), url(${LatoBold}) format('truetype');
+    }
+
+    @font-face {
+        font-family: 'Poppins';
+        font-weight: 900;
+        src: local('Poppins'), url(${PoppinsBlack}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-weight: 400;
+        src: local('Poppins'), url(${PoppinsRegular}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-weight: 700;
+        src: local('Poppins'), url(${PoppinsBold}) format('truetype');
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.15em;
+        background-color: #bd9835;
+    }
+
+    svg {
+        display: block;
+    }
+`;
+
+export default GlobalStyles;
