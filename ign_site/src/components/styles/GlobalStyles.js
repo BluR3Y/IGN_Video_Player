@@ -50,11 +50,18 @@ const GlobalStyles = createGlobalStyle`
     body {
         font-family: 'Poppins', sans-serif;
         font-size: 1.15em;
-        background-color: #bd9835;
+        background-color: ${props => props.theme.secondary};
     }
 
     svg {
         display: block;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus {
+        outline: none;
     }
 `;
 
