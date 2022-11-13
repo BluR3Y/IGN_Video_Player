@@ -22,15 +22,19 @@ export default class App extends React.Component {
                     quaternary: '#ffffff'
                 }
             },
-            activeTheme: null
+            activeTheme: 'dark',
         }
+    }
+
+    toggleTheme = () => {
+        this.setState({ activeTheme: (this.state.activeTheme == 'classic' ? 'dark' : 'classic') });
     }
 
     render() {
         return(
-            <ThemeProvider theme={this.activeTheme != null ? this.activeTheme : this.state.siteThemes.dark}>
+            <ThemeProvider theme={this.state.siteThemes[this.state.activeTheme]}>
                 <GlobalStyles/>
-                <Navigation/>
+                <Navigation activeTheme={this.state.activeTheme} toggleTheme={this.toggleTheme}/>
             </ThemeProvider>
         );
     }

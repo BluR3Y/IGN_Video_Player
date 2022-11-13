@@ -9,11 +9,14 @@ import {
     SelectionList,
     SelectionList_More,
     SearchBox,
-    Profile
+    Profile,
+    ThemeSelection
 } from "./styles/Navigation.styled";
 
 import Caret_Down from '../assets/icons/caret_down';
 import Magnifying_Glass from '../assets/icons/magnifying_glass';
+import Sun from '../assets/icons/sun';
+import Moon from '../assets/icons/moon';
 
 import ProfileImg from '../assets/images/profileImg.jfif';
 
@@ -129,6 +132,11 @@ export default class Navigation extends React.Component {
                             <button type='button' onClick={() => this.setState({ openSearchBar: !this.state.openSearchBar })}><Magnifying_Glass/></button>
                             <input type='text' placeholder="The Last of Us 2 Review"/>
                         </SearchBox>
+                        <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme}>
+                            <div>
+                                {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
+                            </div>
+                        </ThemeSelection>
                         <Profile>
                             <img src={ProfileImg} />
                             <h1>12</h1>

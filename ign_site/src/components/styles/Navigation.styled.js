@@ -166,8 +166,47 @@ export const SearchBox = styled.form`
 
 `;
 
+export const ThemeSelection = styled.button`
+    flex: 0 0 65px;
+    height: 32px;
+    border-radius: 20px;
+    border: 2px solid black;
+    display: flex;
+    background: transparent;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    margin: 0 10px;
+
+    div {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background-color: ${props => props.theme.quaternary};
+        display: flex;
+        align-items: 'center';
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        transition: left 0.10s linear;
+
+        ${props => props.activeTheme == 'dark' && css`
+            left: 33px;
+        `}
+    }
+
+    div > svg {
+        width: 17px;
+        fill: ${props => props.theme.secondary};
+    }
+`;
+
 export const Profile = styled.a.attrs({
     href: 'https://www.ign.com/register',
+    target: '_blank',
     title: 'Register'   
 })`
     flex: 0 0 50px;
@@ -176,10 +215,12 @@ export const Profile = styled.a.attrs({
     justify-content: center;
     align-items: center;
     position: relative;
+    -webkit-user-drag: none;
     
     img {
         width: 90%;
         border-radius: 50%;
+        -webkit-user-drag: none;
     }
 
     h1 {
