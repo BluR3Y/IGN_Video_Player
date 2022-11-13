@@ -55,26 +55,29 @@ export const Date_Logo = styled(Nav_SubContainer)`
 
 export const ContentSelection = styled(Nav_SubContainer)`
     height: 50px;
-    width: 600px;
+    width: 700px;
     padding: 0 !important;
     align-items: center;
     background: transparent !important;
     margin-left: 40px;
 
+    @media (max-width: 1300px) {
+       width: auto !important;
+    }
 `;
 
 export const SelectionList = styled(ContentSelection)`
     height: inherit;
     flex: 1 1 0 !important;
-    justify-content: space-evenly;
-    overflow: hidden;
+    justify-content: space-evenly !important;
     margin: 0;
+    overflow: hidden;
 
     a {
         text-decoration: none;
         color: black;
-        margin: 0 10px;
         font-size: 20px;
+        margin: 10px;
     }
 `;
 

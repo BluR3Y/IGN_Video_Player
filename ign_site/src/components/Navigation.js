@@ -102,7 +102,12 @@ export default class Navigation extends React.Component {
 
     resizeNav = () => {
         var selectionEl = this.state.selectionListRef.current;
-        console.log(selectionEl.offsetWidth)
+        var averageWidth = 85;
+        var numVisibleItems = selectionEl.offsetWidth / averageWidth;
+        var visibleItems = this.state.selectionItems.slice(0, numVisibleItems);
+        var hiddenItems = this.state.selectionItems.slice(numVisibleItems);
+
+        this.setState({ visibleItems, hiddenItems });
     }
 
     render() {
@@ -115,7 +120,7 @@ export default class Navigation extends React.Component {
                     </Date_Logo>
                     <ContentSelection>
                         <SelectionList ref={this.state.selectionListRef}>
-                            {this.state.selectionItems.map((item) => (
+                            {this.state.visibleItems.map((item) => (
                                 <a href={item.link} key={item.id}>{item.title}</a>
                             ))}
                         </SelectionList>
