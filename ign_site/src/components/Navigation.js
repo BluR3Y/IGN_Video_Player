@@ -2,7 +2,6 @@ import React from "react";
 
 import { 
     Nav_Container, 
-    Nav_SubContainer, 
     Date_Logo, 
     StyledLogo, 
     ContentSelection, 
@@ -10,7 +9,7 @@ import {
     SelectionList_More,
     SearchBox,
     Profile,
-    ThemeSelection
+    ThemeSelection,
 } from "./styles/Navigation.styled";
 
 import Caret_Down from '../assets/icons/caret_down';
@@ -57,6 +56,7 @@ export default class Navigation extends React.Component {
             searchRef: React.createRef(),
             selectionListRef: React.createRef(),
             openSearchBar: false,
+            searchAutoComplete: ['Value1', 'Value2', 'Value3']
         }
 
     }
@@ -66,6 +66,7 @@ export default class Navigation extends React.Component {
 
         var searchItem = this.state.searchRef.current;
         searchItem.addEventListener('submit', this.search);
+        searchItem.querySelector('input').addEventListener('input', this.searchAutoComplete);
         window.addEventListener('resize', this.resizeNav);
     }
 
@@ -74,6 +75,7 @@ export default class Navigation extends React.Component {
 
         var searchItem = this.state.searchRef.current;
         searchItem.removeEventListener('submit',this.search);
+        searchItem.querySelector('input').addEventListener('input', this.searchAutoComplete);
         window.removeEventListener('resize', this.resizeNav);
     }
 
@@ -110,6 +112,28 @@ export default class Navigation extends React.Component {
         this.setState({ visibleItems, hiddenItems });
     }
 
+    searchAutoComplete = (el) => {
+        var searchInput = el.target;
+        var apiURL = 'https://api.rawg.io/api/games?';
+
+        var searchParams = {
+            key: '065c4dbc64ad478496a7db0c70ec2765',
+            search: searchInput.value,
+            // search_precise: true,
+            // search_exact: true,
+            // ordering: '-released'
+        }
+        for (const property in searchParams) {
+            apiURL += `${property}=${searchParams[property]}&`;
+        }
+        
+        fetch(apiURL)
+        .then(async res => res.json())
+        .then(data => {
+            console.log(data)
+        })
+    }
+
     render() {
         return(
             <Nav_Container>
@@ -129,15 +153,22 @@ export default class Navigation extends React.Component {
                             <Caret_Down/>
                             <div>
                                 {this.state.hiddenItems.map(item => (
-                                    <a href={item.link} key={item.id}>{item.title}</a>
+                                    <a href={item.link} key={item.id} tabIndex='-1'>{item.title}</a>
                                 ))}
                             </div>
                         </SelectionList_More>
                         <SearchBox ref={this.state.searchRef} open={this.state.openSearchBar}>
-                            <button type='button' onClick={() => this.setState({ openSearchBar: !this.state.openSearchBar })}><Magnifying_Glass/></button>
-                            <input type='text' placeholder="The Last of Us 2 Review"/>
+                            <div className="searchForm">
+                                <button type='button' onClick={() => this.setState({ openSearchBar: !this.state.openSearchBar })}>
+                                    <Magnifying_Glass/>
+                                </button>
+                                <input type='text' placeholder="The Last of Us 2 Review" tabIndex='-1' />
+                            </div>
+                            <div className="searchAutoComplete">
+                                
+                            </div>
                         </SearchBox>
-                        <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme}>
+                        <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
                             <div>
                                 {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
                             </div>

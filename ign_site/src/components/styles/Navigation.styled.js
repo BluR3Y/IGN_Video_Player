@@ -138,6 +138,9 @@ export const SelectionList_More = styled.button`
     div > a:hover {
         background-color: ${props => props.theme.quaternary};
     }
+    div > a:focus {
+        outline: none;
+    }
 
     &:hover {
         overflow: visible;
@@ -147,40 +150,56 @@ export const SelectionList_More = styled.button`
 
 export const SearchBox = styled.form`
     height: 30px;
-    width: ${props => props.open? '100%' : '30px'};
-    overflow: hidden;
-    border-radius: 20px;
+    width: ${props => props.open ? '100%' : '30px'};
     margin: 0 10px;
-    display: flex;
-    transition: width 0.4s linear, background-color 0.4s linear;
-    background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
+    transition: width 0.4s linear;
+    position: relative;
 
-    button {
-        flex: 0 0 30px;
-        height: 30px;
-        border: none;
-        border-radius: 50%;
+    .searchForm {
+        flex: 1 1 0;
+        height: inherit;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        background: transparent;
-    }
-    button:hover {
-        background-color: ${props => props.theme.quaternary};
-    }
-    button > svg {
-        width: 20px;
-    }
+        flex-direction: row;
+        overflow: hidden;
+        border-radius: 20px;
+        background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
+        transition: background-color 0.4s linear;
 
-    input {
-        flex: 1;
-        border: none;
-        font-size: 16px;
-        padding: 0 5px;
-        background: transparent;
-    }
+        button {
+            flex: 0 0 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            cursor: pointer;
 
+            svg {
+                width: 20px;
+            }
+        }
+        button:hover {
+            background-color: ${props => props.theme.quaternary};
+        }
+
+        input {
+            flex: 1;
+            border: none;
+            font-size: 16px;
+            padding: 0 5px;
+            background: transparent;
+        }
+    }
+    .searchAutoComplete {
+        display: ${props => props.open ? 'flex' : 'none'};
+        position: absolute;
+        top: 100%;
+        width: inherit;
+
+        border: 1px solid red;
+    }
 `;
 
 export const ThemeSelection = styled.button`
@@ -195,6 +214,10 @@ export const ThemeSelection = styled.button`
     cursor: pointer;
     overflow: hidden;
     margin: 0 10px;
+
+    &:focus-visible {
+        outline: auto;
+    }
 
     div {
         width: 28px;
