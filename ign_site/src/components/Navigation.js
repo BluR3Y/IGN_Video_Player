@@ -113,7 +113,7 @@ export default class Navigation extends React.Component {
     render() {
         return(
             <Nav_Container>
-                <Nav_SubContainer>
+                <div>
                     <Date_Logo>
                         <StyledLogo/>
                         {this.getDate()}
@@ -143,14 +143,16 @@ export default class Navigation extends React.Component {
                             </div>
                         </ThemeSelection>
                         <Profile>
-                            <img src={ProfileImg} />
+                            <img src={ProfileImg}/>
                             <h1>12</h1>
                         </Profile>
                     </ContentSelection>
-                </Nav_SubContainer>
-                <Nav_SubContainer>
-                    {/* Additiona Content Selection */}
-                </Nav_SubContainer>
+                </div>
+                <div>
+                    {this.state.additionalSelectionItems.map(item => (
+                        <a href={item.link} key={item.id}>{item.title}</a>
+                    ))}
+                </div>
             </Nav_Container>
         );
     }

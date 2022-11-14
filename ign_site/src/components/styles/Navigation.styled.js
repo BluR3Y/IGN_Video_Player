@@ -2,31 +2,47 @@ import styled, { css } from "styled-components";
 
 import IGN_Logo from '../../assets/icons/ign_logo';
 
-export const Nav_SubContainer = styled.div`
+export const Nav_Container = styled.div`
     display: flex;
-    flex-direction: row;
-`;
-
-export const Nav_Container = styled(Nav_SubContainer)`
     flex-direction: column;
     box-shadow: 0 1px #cdcdcd;
-    padding: 0;
 
-    ${Nav_SubContainer} {
-        padding-left: 120px;
-        padding-right: 120px;
+    & > div {
+        display: flex;
+        flex-direction: row;
+        padding: 0 120px;
     }
 
-    ${Nav_SubContainer}:nth-child(1) {
+    & > div:nth-child(1) {
         padding-top: 20px;
         padding-bottom: 20px;
         justify-content: space-between;
         background-color: ${props => props.theme.secondary};
     }
-    ${Nav_SubContainer}:nth-child(2) {
-        padding-top: 20px;
-        padding-bottom: 20px;
+
+    & > div:nth-child(2) {
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        height: 45px;
+        overflow: hidden;
+        user-select: none;
         background-color: ${props => props.theme.tertiary};
+    }
+
+    & > div:nth-child(2) a {
+        text-decoration: none;
+        font-family: Lato;
+        font-weight: 700;
+        font-size: 15px;
+        color: #404041;
+        line-height: 25px;
+        padding: 0 28px;
+        margin: 12px 0;
+        border-left: 1px solid ${props => props.theme.primary};
+    }
+    & > div:nth-child(2) a:first-child {
+        border-left: none;
     }
 `;
 
@@ -35,11 +51,12 @@ export const StyledLogo = styled(IGN_Logo)`
     height: auto;
 `;
 
-export const Date_Logo = styled(Nav_SubContainer)`
-    padding: 0 !important;
-    height: 50px;
+export const Date_Logo = styled.div`
+    display: flex;
+    flex-direction: row;
     align-items: center;
     user-select: none;
+    height: 50px;
 
     h1 {
         height: inherit;
@@ -50,20 +67,17 @@ export const Date_Logo = styled(Nav_SubContainer)`
         justify-content: space-evenly;
         margin-left: 15px;
         white-space: nowrap;
-    } 
+    }
 `;
 
-export const ContentSelection = styled(Nav_SubContainer)`
-    height: 50px;
-    width: 700px;
-    padding: 0 !important;
+export const ContentSelection = styled.div`
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    background: transparent !important;
     margin-left: 40px;
-
-    @media (max-width: 1300px) {
-       width: auto !important;
-    }
+    width: 700px;
+    height: 50px;
+    user-select: none;
 `;
 
 export const SelectionList = styled(ContentSelection)`
