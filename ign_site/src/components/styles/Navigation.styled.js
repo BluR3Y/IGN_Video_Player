@@ -161,7 +161,8 @@ export const SearchBox = styled.form`
         display: flex;
         flex-direction: row;
         overflow: hidden;
-        border-radius: 20px;
+        /* border-radius: ${props => props.numAutoComplete ? '8px 8px 0 0' : '20px'}; */
+        border-radius: ${props => props.searchInputFocused ? '8px 8px 0 0' : '20px'};
         background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
         transition: background-color 0.4s linear;
 
@@ -193,12 +194,51 @@ export const SearchBox = styled.form`
         }
     }
     .searchAutoComplete {
-        display: ${props => props.open ? 'flex' : 'none'};
+        display: ${props => props.searchInputFocused ? 'block' : 'none'};
         position: absolute;
         top: 100%;
         width: inherit;
+        border-radius: 0 0 8px 8px;
+        overflow: hidden;
+        background-color: ${props => props.theme.tertiary};
+    }
+`;
 
-        border: 1px solid red;
+export const AutoCompleteItem = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    height: 48px;
+    z-index: 2;
+    
+    &:hover {
+        background-color: #fff;
+    }
+
+    div {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        margin: 0 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: black;
+
+        img { 
+            width: auto;
+            height: inherit;
+            object-fit: cover;
+        }
+    }
+
+    h1 {
+        flex: 1 1 0;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
     }
 `;
 

@@ -7,6 +7,7 @@ import LatoBold from '../../assets/fonts/Lato/Lato-Bold.ttf';
 import PoppinsRegular from '../../assets/fonts/Poppins/Poppins-Regular.ttf';
 import PoppinsBlack from '../../assets/fonts/Poppins/Poppins-Black.ttf';
 import PoppinsBold from '../../assets/fonts/Poppins/Poppins-Bold.ttf';
+import PoppinsMedium from '../../assets/fonts/Poppins/Poppins-Medium.ttf';
 
 const GlobalStyles = createGlobalStyle`
     @font-face {
@@ -39,6 +40,11 @@ const GlobalStyles = createGlobalStyle`
         font-family: 'Poppins';
         font-weight: 700;
         src: local('Poppins'), url(${PoppinsBold}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-weight: 500;
+        src: local('Poppins'), url(${PoppinsMedium}) format('truetype');
     }
 
     * {
