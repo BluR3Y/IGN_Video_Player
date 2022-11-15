@@ -161,8 +161,7 @@ export const SearchBox = styled.form`
         display: flex;
         flex-direction: row;
         overflow: hidden;
-        /* border-radius: ${props => props.numAutoComplete ? '8px 8px 0 0' : '20px'}; */
-        border-radius: ${props => props.searchInputFocused ? '8px 8px 0 0' : '20px'};
+        border-radius: ${props => props.autoCompleteLen && props.searchInputFocused ? '8px 8px 0 0 ' : '20px'};
         background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
         transition: background-color 0.4s linear;
 
@@ -213,7 +212,7 @@ export const AutoCompleteItem = styled.div`
     z-index: 2;
     
     &:hover {
-        background-color: #fff;
+        background-color: ${props => props.theme.primary};
     }
 
     div {
@@ -225,12 +224,15 @@ export const AutoCompleteItem = styled.div`
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: black;
+        background-color: ${props => props.itemProps.background_image ? '#0f0f0f' : 'transparent'};
 
         img { 
             width: auto;
             height: inherit;
             object-fit: cover;
+        }
+        svg {
+            width: 15px;
         }
     }
 

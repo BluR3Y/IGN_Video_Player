@@ -123,8 +123,8 @@ export default class Navigation extends React.Component {
         searchRef.dispatchEvent(new Event('submit'));
     }
 
-    searchAutoComplete = (el) => {
-        var searchInput = el.target;
+    searchAutoComplete = (event) => {
+        var searchInput = event.target;
         var apiURL = 'https://api.rawg.io/api/games?';
 
         var searchParams = {
@@ -148,16 +148,19 @@ export default class Navigation extends React.Component {
     }
 
     toggleSearchFocus = (event) => {
-
         if(event.type === 'blur') {
             const searchForm = this.state.searchRef.current;
             requestAnimationFrame(() => {
                 const newTarget = document.activeElement;
-                console.log(newTarget)
+                if(searchForm.contains(newTarget)) 
+                    newTarget.click();
+                this.setState({ searchInputFocused: !this.state.searchInputFocused });
             })
+        }else{
+            if(event.currentTarget.value === '')
+                event.currentTarget.dispatchEvent(new Event('input'));
             this.setState({ searchInputFocused: !this.state.searchInputFocused });
-        }else
-            this.setState({ searchInputFocused: !this.state.searchInputFocused });
+        }
     }
 
     resizeNav = () => {
@@ -197,6 +200,7 @@ export default class Navigation extends React.Component {
                             ref={this.state.searchRef} 
                             open={this.state.openSearchBar} 
                             searchInputFocused={this.state.searchInputFocused}
+                            autoCompleteLen={this.state.autoCompleteItems.length}
                         >
                             <div className="searchForm">
                                 <button type='button' onClick={() => this.setState({ openSearchBar: !this.state.openSearchBar })}>
@@ -206,8 +210,6 @@ export default class Navigation extends React.Component {
                                     type='text' 
                                     placeholder="The Last of Us 2 Review" 
                                     tabIndex='-1' 
-                                    // onFocus={() => this.setState({ searchInputFocused : !this.state.searchInputFocused })}
-                                    // onBlur={() => this.setState({ searchInputFocused : !this.state.searchInputFocused })}
                                 />
                             </div>
                             <div className="searchAutoComplete">
@@ -216,9 +218,10 @@ export default class Navigation extends React.Component {
                                         key={item.id}
                                         onClick={this.selectAutoComplete}
                                         tabIndex='0'
+                                        itemProps={item}
                                     >
                                         <div>
-                                            <img src={item.background_image} />
+                                            {item.background_image ? <img src={item.background_image} /> : <Magnifying_Glass/>}
                                         </div>
                                         <h1>{item.name}</h1>
                                     </AutoCompleteItem>
