@@ -64,21 +64,31 @@ export default class Navigation extends React.Component {
     }
 
     componentDidMount() {
+        // Page Events
         window.addEventListener('load', this.resizeNav)
-
-        var searchItem = this.state.searchRef.current;
-        searchItem.addEventListener('submit', this.search);
-        searchItem.querySelector('input').addEventListener('input', this.searchAutoComplete);
         window.addEventListener('resize', this.resizeNav);
+
+        // Search Events
+        var searchForm = this.state.searchRef.current;
+        var searchInput = searchForm.querySelector('input');
+        searchForm.addEventListener('submit', this.search);
+        searchInput.addEventListener('input', this.searchAutoComplete);
+        searchInput.addEventListener('focus', this.toggleSearchFocus);
+        searchInput.addEventListener('blur', this.toggleSearchFocus);
     }
 
     componentWillUnmount() {
+        // Page Events
         window.removeEventListener('load', this.resizeNav)
-
-        var searchItem = this.state.searchRef.current;
-        searchItem.removeEventListener('submit',this.search);
-        searchItem.querySelector('input').addEventListener('input', this.searchAutoComplete);
         window.removeEventListener('resize', this.resizeNav);
+
+        // Search Events
+        var searchForm = this.state.searchRef.current;
+        var searchInput = searchForm.querySelector('input');
+        searchForm.removeEventListener('submit', this.search);
+        searchInput.removeEventListener('input', this.searchAutoComplete);
+        searchInput.removeEventListener('focus', this.toggleSearchFocus);
+        searchInput.removeEventListener('blur', this.toggleSearchFocus);
     }
 
     getDate = () => {
@@ -137,6 +147,19 @@ export default class Navigation extends React.Component {
         })
     }
 
+    toggleSearchFocus = (event) => {
+
+        if(event.type === 'blur') {
+            const searchForm = this.state.searchRef.current;
+            requestAnimationFrame(() => {
+                const newTarget = document.activeElement;
+                console.log(newTarget)
+            })
+            this.setState({ searchInputFocused: !this.state.searchInputFocused });
+        }else
+            this.setState({ searchInputFocused: !this.state.searchInputFocused });
+    }
+
     resizeNav = () => {
         var selectionEl = this.state.selectionListRef.current;
         var averageWidth = 85;
@@ -183,8 +206,8 @@ export default class Navigation extends React.Component {
                                     type='text' 
                                     placeholder="The Last of Us 2 Review" 
                                     tabIndex='-1' 
-                                    onFocus={() => this.setState({ searchInputFocused : !this.state.searchInputFocused })}
-                                    onBlur={() => this.setState({ searchInputFocused : !this.state.searchInputFocused })}
+                                    // onFocus={() => this.setState({ searchInputFocused : !this.state.searchInputFocused })}
+                                    // onBlur={() => this.setState({ searchInputFocused : !this.state.searchInputFocused })}
                                 />
                             </div>
                             <div className="searchAutoComplete">
@@ -192,6 +215,7 @@ export default class Navigation extends React.Component {
                                     <AutoCompleteItem 
                                         key={item.id}
                                         onClick={this.selectAutoComplete}
+                                        tabIndex='0'
                                     >
                                         <div>
                                             <img src={item.background_image} />

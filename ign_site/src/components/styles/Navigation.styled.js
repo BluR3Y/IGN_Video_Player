@@ -75,7 +75,7 @@ export const ContentSelection = styled.div`
     flex-direction: row;
     align-items: center;
     margin-left: 40px;
-    width: 700px;
+    max-width: 700px;
     height: 50px;
     user-select: none;
 `;
@@ -238,6 +238,7 @@ export const AutoCompleteItem = styled.div`
         flex: 1 1 0;
         font-size: 16px;
         font-weight: 500;
+        line-height: 18px;
         cursor: pointer;
     }
 `;
