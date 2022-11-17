@@ -19,6 +19,7 @@ import Sun from '../assets/icons/sun';
 import Moon from '../assets/icons/moon';
 
 import ProfileImg from '../assets/images/profileImg.jfif';
+import SearchBar from "./SearchBar";
 
 export default class Navigation extends React.Component {
     constructor(props) {
@@ -54,41 +55,22 @@ export default class Navigation extends React.Component {
                 { id: 8, title: "Super Troopers 2", link: 'https://www.ign.com/movies/super-troopers-2'},
                 { id: 9, title: "Marvel's The Defenders", link: 'https://www.ign.com/articles/2017/08/18/marvels-the-defenders-season-1-review'},
             ],
-            searchRef: React.createRef(),
             selectionListRef: React.createRef(),
-            openSearchBar: false,
-            searchInputFocused: false,
-            autoCompleteItems: []
+            searchBarRef: React.createRef()
         }
-
+        this.submitSearch = this.submitSearch.bind(this);
     }
 
     componentDidMount() {
         // Page Events
         window.addEventListener('load', this.resizeNav)
         window.addEventListener('resize', this.resizeNav);
-
-        // Search Events
-        var searchForm = this.state.searchRef.current;
-        var searchInput = searchForm.querySelector('input');
-        searchForm.addEventListener('submit', this.search);
-        searchInput.addEventListener('input', this.searchAutoComplete);
-        searchInput.addEventListener('focus', this.toggleSearchFocus);
-        searchInput.addEventListener('blur', this.toggleSearchFocus);
     }
 
     componentWillUnmount() {
         // Page Events
         window.removeEventListener('load', this.resizeNav)
         window.removeEventListener('resize', this.resizeNav);
-
-        // Search Events
-        var searchForm = this.state.searchRef.current;
-        var searchInput = searchForm.querySelector('input');
-        searchForm.removeEventListener('submit', this.search);
-        searchInput.removeEventListener('input', this.searchAutoComplete);
-        searchInput.removeEventListener('focus', this.toggleSearchFocus);
-        searchInput.removeEventListener('blur', this.toggleSearchFocus);
     }
 
     getDate = () => {
@@ -107,20 +89,12 @@ export default class Navigation extends React.Component {
         );
     }
 
-    search = (el) => {
-        el.preventDefault();
-        var searchInput = el.target.querySelector('input');
+    submitSearch = (event) => {
+        event.preventDefault();
+        var searchInput = event.currentTarget.querySelector('input');
         window.open(`https://www.google.com/search?q=${searchInput.value} site:ign.com`, '_blank');
         searchInput.value = '';
-        this.setState({ autoCompleteItems: [] });
-    }
-
-    selectAutoComplete = (el) => {
-        var searchStr = el.currentTarget.querySelector('h1').innerHTML;
-        var searchRef = this.state.searchRef.current;
-        var inputEl = searchRef.querySelector('input');
-        inputEl.value = searchStr;
-        searchRef.dispatchEvent(new Event('submit'));
+        searchInput.dispatchEvent(new Event('input'));
     }
 
     searchAutoComplete = (event) => {
@@ -143,24 +117,9 @@ export default class Navigation extends React.Component {
         .then(async res => res.json())
         .then(data => {
             var autoCompleteItems = data.results;
-            this.setState({ autoCompleteItems });
+            var searchBar = this.state.searchBarRef.current;
+            searchBar.setState({ autoCompleteItems });
         })
-    }
-
-    toggleSearchFocus = (event) => {
-        if(event.type === 'blur') {
-            const searchForm = this.state.searchRef.current;
-            requestAnimationFrame(() => {
-                const newTarget = document.activeElement;
-                if(searchForm.contains(newTarget)) 
-                    newTarget.click();
-                this.setState({ searchInputFocused: !this.state.searchInputFocused });
-            })
-        }else{
-            if(event.currentTarget.value === '')
-                event.currentTarget.dispatchEvent(new Event('input'));
-            this.setState({ searchInputFocused: !this.state.searchInputFocused });
-        }
     }
 
     resizeNav = () => {
@@ -196,38 +155,11 @@ export default class Navigation extends React.Component {
                                 ))}
                             </div>
                         </SelectionList_More>
-                        <SearchBox 
-                            ref={this.state.searchRef} 
-                            open={this.state.openSearchBar} 
-                            searchInputFocused={this.state.searchInputFocused}
-                            autoCompleteLen={this.state.autoCompleteItems.length}
-                        >
-                            <div className="searchForm">
-                                <button type='button' onClick={() => this.setState({ openSearchBar: !this.state.openSearchBar })}>
-                                    <Magnifying_Glass/>
-                                </button>
-                                <input 
-                                    type='text' 
-                                    placeholder="The Last of Us 2 Review" 
-                                    tabIndex='-1' 
-                                />
-                            </div>
-                            <div className="searchAutoComplete">
-                                {this.state.autoCompleteItems.map(item => (
-                                    <AutoCompleteItem 
-                                        key={item.id}
-                                        onClick={this.selectAutoComplete}
-                                        tabIndex='0'
-                                        itemProps={item}
-                                    >
-                                        <div>
-                                            {item.background_image ? <img src={item.background_image} /> : <Magnifying_Glass/>}
-                                        </div>
-                                        <h1>{item.name}</h1>
-                                    </AutoCompleteItem>
-                                ))}
-                            </div>
-                        </SearchBox>
+                        <SearchBar
+                            ref={this.state.searchBarRef}
+                            onSubmit={this.submitSearch}
+                            onInput={this.searchAutoComplete}
+                        />
                         <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
                             <div>
                                 {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
