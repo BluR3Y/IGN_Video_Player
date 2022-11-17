@@ -2,10 +2,64 @@ import React from "react";
 
 import {
     StyledSearchBar,
-    AutoCompleteItem,
+    StyledAutoCompleteItem,
+    StyledLoadingAutoCompleteItem
 } from './styles/SearchBar.styled';
 
 import Magnifying_Glass from "../assets/icons/magnifying_glass";
+
+class AutoCompleteItem extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            gamePlatforms: null,
+        }
+    }
+
+    componentDidMount() {
+        this.getPlatforms(this.props.itemProps.parent_platforms);
+    }
+
+    componentDidUpdate(prevProps) {
+        if(prevProps.itemProps !== this.props.itemProps) {
+            this.getPlatforms(this.props.itemProps.parent_platforms);
+        }
+    }
+
+    async getPlatforms(platforms) {
+        var gamePlatforms = [];
+
+        await Promise.all(platforms.map(async (platform) => {
+            try {
+                var platformItem = await React.lazy(() => import(`../assets/icons/platforms/${platform.platform.slug}`));
+                gamePlatforms.push(platformItem);
+            }catch(err) {
+                console.log('unknown: ', platform.platform.slug)
+            }
+        }))
+
+        this.setState({ gamePlatforms });
+    }
+
+    render() {
+        const { gamePlatforms } = this.state;
+        if(gamePlatforms === null)
+            return(<StyledLoadingAutoCompleteItem/>);
+        return(<StyledAutoCompleteItem
+            onClick={this.props.onClick}
+        >
+            <div className="AutoComplete-Img">
+                {this.props.itemProps.background_image ? <img src={this.props.itemProps.background_image} /> : <Magnifying_Glass/>}
+            </div>
+            <div className="AutoComplete-Info">
+                <div>
+                    {this.state.gamePlatforms.map((Item, index) => (<Item key={index}/>))}
+                </div>
+                <h1>{this.props.itemProps.name}</h1>
+            </div>
+        </StyledAutoCompleteItem>);
+    }
+}
 
 export default class SearchBar extends React.Component {
     constructor(props) {
@@ -79,17 +133,11 @@ export default class SearchBar extends React.Component {
             </div>
             <div className="searchAutoComplete">
                 {this.state.autoCompleteItems.map(item => (
-                    <AutoCompleteItem 
+                    <AutoCompleteItem
                         key={item.id}
-                        onClick={this.selectAutoComplete}
-                        tabIndex='0'
                         itemProps={item}
-                    >
-                        <div>
-                            {item.background_image ? <img src={item.background_image} /> : <Magnifying_Glass/>}
-                        </div>
-                        <h1>{item.name}</h1>
-                    </AutoCompleteItem>
+                        onClick={this.selectAutoComplete}
+                    />
                 ))}
             </div>
         </StyledSearchBar>);
