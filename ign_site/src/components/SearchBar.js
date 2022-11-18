@@ -80,26 +80,8 @@ export default class SearchBar extends React.Component {
             searchBarRef: React.createRef(),
             openSearchBar: false,
             searchInputFocused: false,
-            autoCompleteItems: [],
+            autoCompleteItems: null,
         }
-    }
-
-    componentDidMount() {
-        var searchForm = this.state.searchBarRef.current;
-        var searchInput = searchForm.querySelector('input');
-        searchForm.addEventListener('submit', this.props.onSubmit);
-        searchInput.addEventListener('input', this.props.onInput);
-        searchInput.addEventListener('focus', this.toggleSearchFocus);
-        searchInput.addEventListener('blur', this.toggleSearchFocus);
-    }
-
-    componentWillUnmount() {
-        var searchForm = this.state.searchBarRef.current;
-        var searchInput = searchForm.querySelector('input');
-        searchForm.removeEventListener('submit', this.props.onSubmit);
-        searchInput.removeEventListener('input', this.props.onInput);
-        searchInput.removeEventListener('focus', this.toggleSearchFocus);
-        searchInput.removeEventListener('blur', this.toggleSearchFocus);
     }
 
     toggleSearchFocus = (event) => {
@@ -112,8 +94,8 @@ export default class SearchBar extends React.Component {
                 this.setState(prevState => ({ searchInputFocused: !prevState.searchInputFocused }));
             })
         }else{
-            // if(event.currentTarget.value === '')
-            //     event.currentTarget.dispatchEvent(new Event('input'));
+            if(this.state.autoCompleteItems === null)
+                this.props.onInput(event);
             this.setState(prevState => ({ searchInputFocused: !prevState.searchInputFocused }));
         }
     }
@@ -131,7 +113,8 @@ export default class SearchBar extends React.Component {
             ref={this.state.searchBarRef} 
             open={this.state.openSearchBar} 
             searchInputFocused={this.state.searchInputFocused}
-            autoCompleteLen={this.state.autoCompleteItems.length}
+            autoCompleteLen={this.state.autoCompleteItems ? this.state.autoCompleteItems.length : '0'}
+            onSubmit={this.props.onSubmit}
         >
             <div className="searchForm">
                 <button type='button' onClick={() => this.setState(prevState => ({ openSearchBar: !prevState.openSearchBar }))}>
@@ -141,10 +124,13 @@ export default class SearchBar extends React.Component {
                     type='text' 
                     placeholder="The Last of Us 2 Review" 
                     tabIndex='-1' 
+                    onInput={this.props.onInput}
+                    onFocus={this.toggleSearchFocus}
+                    onBlur={this.toggleSearchFocus}
                 />
             </div>
             <div className="searchAutoComplete">
-                {this.state.autoCompleteItems.map(item => (
+                {this.state.autoCompleteItems && this.state.autoCompleteItems.map(item => (
                     <AutoCompleteItem
                         key={item.id}
                         itemProps={item}

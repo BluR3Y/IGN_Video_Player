@@ -100,7 +100,7 @@ export default class Navigation extends React.Component {
     searchAutoComplete = (event) => {
         var searchInput = event.target;
         var apiURL = 'https://api.rawg.io/api/games?';
-
+        console.log('called')
         var searchParams = {
             key: '065c4dbc64ad478496a7db0c70ec2765',
             search: searchInput.value,
@@ -119,7 +119,6 @@ export default class Navigation extends React.Component {
             var autoCompleteItems = data.results;
             var searchBar = this.state.searchBarRef.current;
             searchBar.setState({ autoCompleteItems });
-            console.log('marker')
         })
     }
 
