@@ -92,7 +92,7 @@ export default class Navigation extends React.Component {
     submitSearch = (event) => {
         event.preventDefault();
         var searchInput = event.currentTarget.querySelector('input');
-        window.open(`https://www.google.com/search?q=${searchInput.value} site:ign.com`, '_blank');
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(searchInput.value)} site:ign.com`, '_blank');
         searchInput.value = '';
         searchInput.dispatchEvent(new Event('input'));
     }
@@ -119,6 +119,7 @@ export default class Navigation extends React.Component {
             var autoCompleteItems = data.results;
             var searchBar = this.state.searchBarRef.current;
             searchBar.setState({ autoCompleteItems });
+            console.log('marker')
         })
     }
 

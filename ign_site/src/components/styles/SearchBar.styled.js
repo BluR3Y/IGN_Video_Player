@@ -101,11 +101,20 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
         div {
             display: flex;
             flex-direction: row;
+            align-items: center;
 
             svg {
                 height: 15px;
+                width: auto;
                 fill: #fff;
-                margin-right: 4px;
+                margin-right: 5px;
+            }
+
+            h1 {
+                font-size: 18px;
+                font-weight: 400;
+                letter-spacing: -2px;
+                color: #fff;
             }
         }
         h1 {
@@ -115,8 +124,8 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
             line-height: 18px;
             cursor: pointer;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            /* overflow: hidden;
+            text-overflow: ellipsis; */
         }
     }
 `;

@@ -18,6 +18,11 @@ class AutoCompleteItem extends React.Component {
 
     componentDidMount() {
         this.getPlatforms(this.props.itemProps.parent_platforms);
+        
+    }
+
+    componentWillUnmount() {
+
     }
 
     componentDidUpdate(prevProps) {
@@ -26,18 +31,25 @@ class AutoCompleteItem extends React.Component {
         }
     }
 
-    async getPlatforms(platforms) {
-        var gamePlatforms = [];
-
-        await Promise.all(platforms.map(async (platform) => {
+    async getPlatforms(platforms = []) {
+        var otherPlatforms = 0;
+        var platformImports = await Promise.allSettled(platforms.map(async (platform) => {
             try {
-                var platformItem = await React.lazy(() => import(`../assets/icons/platforms/${platform.platform.slug}`));
-                gamePlatforms.push(platformItem);
+                var platformImport = await import(`../assets/icons/platforms/${platform.platform.slug}`);
+                var platformItem = await React.lazy( async () => platformImport);
+                return platformItem;
             }catch(err) {
-                console.log('unknown: ', platform.platform.slug)
+                return Promise.reject();
             }
         }))
-
+        var filteredPlatforms = platformImports.filter(platform => {
+            if(platform.status === 'rejected')
+                otherPlatforms += 1;
+            return platform.status === 'fulfilled';
+        })
+        var gamePlatforms = filteredPlatforms.map(platform => platform.value);
+        if(otherPlatforms > 0)
+            gamePlatforms.push(() => React.createElement('h1', null, `+ ${otherPlatforms}`));
         this.setState({ gamePlatforms });
     }
 
@@ -100,14 +112,14 @@ export default class SearchBar extends React.Component {
                 this.setState(prevState => ({ searchInputFocused: !prevState.searchInputFocused }));
             })
         }else{
-            if(event.currentTarget.value === '')
-                event.currentTarget.dispatchEvent(new Event('input'));
+            // if(event.currentTarget.value === '')
+            //     event.currentTarget.dispatchEvent(new Event('input'));
             this.setState(prevState => ({ searchInputFocused: !prevState.searchInputFocused }));
         }
     }
 
     selectAutoComplete = (event) => {
-        var searchStr = event.currentTarget.querySelector('h1').innerHTML;
+        var searchStr = event.currentTarget.querySelector('h1').innerText;
         var searchBarRef = this.state.searchBarRef.current;
         var inputEl = searchBarRef.querySelector('input');
         inputEl.value = searchStr;
