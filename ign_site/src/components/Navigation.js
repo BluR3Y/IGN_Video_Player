@@ -96,33 +96,8 @@ export default class Navigation extends React.Component {
         searchInput.dispatchEvent(new Event('input'));
     }
 
-    // searchAutoComplete = (event) => {
-    //     var searchInput = event.target;
-    //     var apiURL = 'https://api.rawg.io/api/games?';
-    //     var searchParams = {
-    //         key: '065c4dbc64ad478496a7db0c70ec2765',
-    //         search: searchInput.value,
-    //         page_size: 5,
-    //         search_precise: true,
-    //         search_exact: true,
-    //         // ordering: '-released'
-    //     }
-    //     for (const property in searchParams) {
-    //         apiURL += `${property}=${searchParams[property]}&`;
-    //     }
-        
-    //     fetch(apiURL)
-    //     .then(async res => res.json())
-    //     .then(data => {
-    //         var autoCompleteItems = data.results;
-    //         var searchBar = this.state.searchBarRef.current;
-    //         searchBar.setState({ autoCompleteItems });
-    //     })
-    // }
-
-    searchAutoComplete = async (event) => {
+    searchAutoComplete = async (searchQuery) => {
         const { searchBarRef } = this.state;
-        var searchQuery = event.currentTarget.value;
         var gamesURL = 'https://api.rawg.io/api/games?';
         var searchParams = {
             key: '065c4dbc64ad478496a7db0c70ec2765',
@@ -167,7 +142,6 @@ export default class Navigation extends React.Component {
     }
 
 
-
     resizeNav = () => {
         var selectionEl = this.state.selectionListRef.current;
         var averageWidth = 85;
@@ -204,7 +178,7 @@ export default class Navigation extends React.Component {
                         <SearchBar
                             ref={this.state.searchBarRef}
                             onSubmit={this.submitSearch}
-                            onInput={this.searchAutoComplete}
+                            searchAutoComplete={this.searchAutoComplete}
                         />
                         <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
                             <div>

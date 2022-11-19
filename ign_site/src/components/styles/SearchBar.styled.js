@@ -59,7 +59,7 @@ export const StyledSearchBar = styled.form`
 export const StyledAutoCompleteGame = styled.div.attrs(() => ({
     tabIndex: 0,
 }))`
-    display: flex;
+    display: ${props => props.isLoaded ? 'flex' : 'none'};
     flex-direction: row;
     align-items: center;
     cursor: pointer;
@@ -128,6 +128,7 @@ export const StyledAutoCompleteGame = styled.div.attrs(() => ({
 `;
 
 export const StyledAutoCompleteMovie = styled(StyledAutoCompleteGame)`
+    display: ${props => props.isLoaded ? 'flex' : 'none'};
     height: 60px;
 
     & .AutoComplete-Img {

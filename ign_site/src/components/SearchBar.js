@@ -16,6 +16,7 @@ class AutoCompleteGame extends React.Component {
         super(props);
         this.state = {
             gamePlatforms: null,
+            imageLoaded: (this.props.itemProps.background_image ? false : true),
         }
     }
 
@@ -52,41 +53,56 @@ class AutoCompleteGame extends React.Component {
     }
 
     render() {
-        const { gamePlatforms } = this.state;
-        if(gamePlatforms === null)
-            return(<StyledLoadingAutoCompleteItem/>);
-        return(<StyledAutoCompleteGame
-            onClick={this.props.onClick}
-        >
-            <div className="AutoComplete-Img">
-                {this.props.itemProps.background_image ? 
-                    <img 
-                        src={this.props.itemProps.background_image} 
-                    /> 
-                    : 
-                    <Controller/>
-                }
-            </div>
-            <div className="AutoComplete-Info">
-                <div>
-                    {this.state.gamePlatforms.map((Item, index) => (<Item key={index}/>))}
+        const { gamePlatforms, imageLoaded } = this.state;
+        return(
+            <>
+            <StyledAutoCompleteGame
+                onClick={this.props.onClick}
+                isLoaded={gamePlatforms !== null && imageLoaded}
+            >
+                <div className="AutoComplete-Img">
+                    {this.props.itemProps.background_image ? 
+                        <img 
+                            src={this.props.itemProps.background_image} 
+                            onLoad={() => this.setState({ imageLoaded: true })}
+                        /> 
+                        : 
+                        <Controller />
+                    }
                 </div>
-                <h1>{this.props.itemProps.name}</h1>
-            </div>
-        </StyledAutoCompleteGame>);
+                <div className="AutoComplete-Info">
+                    <div>
+                        {this.state.gamePlatforms && this.state.gamePlatforms.map((Item, index) => (<Item key={index}/>))}
+                    </div>
+                    <h1>{this.props.itemProps.name}</h1>
+                </div>
+            </StyledAutoCompleteGame>
+            {(!imageLoaded || gamePlatforms === null) && (<StyledLoadingAutoCompleteItem/>)}
+            </>
+        );
     }
 }
 
 class AutoCompleteMovie extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            imageLoaded: (this.props.itemProps.poster_path ? true : true)
+        }
+    }
 
     render() {
-        return(<StyledAutoCompleteMovie
+        const { imageLoaded } = this.state;
+        return(<>
+        <StyledAutoCompleteMovie
             onClick={this.props.onClick}
+            isLoaded={imageLoaded}
         >
             <div className="AutoComplete-Img">
                 {this.props.itemProps.poster_path ? 
                     <img
                         src={'https://image.tmdb.org/t/p/w500' + this.props.itemProps.poster_path}
+                        onLoad={() => this.setState({ imageLoaded: true })}
                     />
                     :
                     <Film/>
@@ -96,7 +112,9 @@ class AutoCompleteMovie extends React.Component {
                 <h1>{this.props.itemProps.title}</h1>
                 <h2>{this.props.itemProps.release_date}</h2>
             </div>
-        </StyledAutoCompleteMovie>);
+        </StyledAutoCompleteMovie>
+        {!imageLoaded && (<StyledLoadingAutoCompleteItem/>)}
+        </>);
     }
 }
 
@@ -104,10 +122,12 @@ export default class SearchBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            searchQuery: '',
             searchBarRef: React.createRef(),
             openSearchBar: false,
             searchInputFocused: false,
             autoCompleteItems: null,
+            typingTimeout: 0,
         }
     }
 
@@ -115,14 +135,14 @@ export default class SearchBar extends React.Component {
         const { searchBarRef } = this.state;
         const searchInput = searchBarRef.current.querySelector('input');
         searchBarRef.current.addEventListener('submit', this.props.onSubmit);
-        searchInput.addEventListener('input', this.props.onInput);
+        searchInput.addEventListener('input', this.updateQuery);
     }
 
     componentWillUnmount() {
         const { searchBarRef } = this.state;
         const searchInput = searchBarRef.current.querySelector('input');
         searchBarRef.current.removeEventListener('submit', this.props.onSubmit);
-        searchInput.removeEventListener('input', this.props.onInput);
+        searchInput.removeEventListener('input', this.updateQuery);
     }
 
     toggleSearchFocus = (event) => {
@@ -136,7 +156,7 @@ export default class SearchBar extends React.Component {
             })
         }else{
             if(this.state.autoCompleteItems === null)
-                this.props.onInput(event);
+                this.props.searchAutoComplete(this.state.searchQuery);
             this.setState(prevState => ({ searchInputFocused: !prevState.searchInputFocused }));
         }
     }
@@ -147,6 +167,19 @@ export default class SearchBar extends React.Component {
         var inputEl = searchBarRef.querySelector('input');
         inputEl.value = searchStr;
         searchBarRef.dispatchEvent(new Event('submit'));
+    }
+
+    updateQuery = (event) => {
+        if(this.state.typingTimeout) {
+            clearTimeout(this.state.typingTimeout);
+        }
+
+        this.setState({
+            searchQuery: event.target.value,
+            typingTimeout: setTimeout(function () {
+                this.props.searchAutoComplete(this.state.searchQuery);
+            }.bind(this), 150)
+        })
     }
 
     render() {
