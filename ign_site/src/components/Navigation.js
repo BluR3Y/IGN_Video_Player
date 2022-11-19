@@ -58,7 +58,6 @@ export default class Navigation extends React.Component {
             selectionListRef: React.createRef(),
             searchBarRef: React.createRef()
         }
-        this.submitSearch = this.submitSearch.bind(this);
     }
 
     componentDidMount() {
@@ -97,30 +96,77 @@ export default class Navigation extends React.Component {
         searchInput.dispatchEvent(new Event('input'));
     }
 
-    searchAutoComplete = (event) => {
-        var searchInput = event.target;
-        var apiURL = 'https://api.rawg.io/api/games?';
-        console.log('called')
+    // searchAutoComplete = (event) => {
+    //     var searchInput = event.target;
+    //     var apiURL = 'https://api.rawg.io/api/games?';
+    //     var searchParams = {
+    //         key: '065c4dbc64ad478496a7db0c70ec2765',
+    //         search: searchInput.value,
+    //         page_size: 5,
+    //         search_precise: true,
+    //         search_exact: true,
+    //         // ordering: '-released'
+    //     }
+    //     for (const property in searchParams) {
+    //         apiURL += `${property}=${searchParams[property]}&`;
+    //     }
+        
+    //     fetch(apiURL)
+    //     .then(async res => res.json())
+    //     .then(data => {
+    //         var autoCompleteItems = data.results;
+    //         var searchBar = this.state.searchBarRef.current;
+    //         searchBar.setState({ autoCompleteItems });
+    //     })
+    // }
+
+    searchAutoComplete = async (event) => {
+        const { searchBarRef } = this.state;
+        var searchQuery = event.currentTarget.value;
+        var gamesURL = 'https://api.rawg.io/api/games?';
         var searchParams = {
             key: '065c4dbc64ad478496a7db0c70ec2765',
-            search: searchInput.value,
+            search: searchQuery,
             page_size: 5,
-            // search_precise: true,
-            // search_exact: true,
+            search_precise: true,
+            search_exact: true,
             // ordering: '-released'
         }
         for (const property in searchParams) {
-            apiURL += `${property}=${searchParams[property]}&`;
+            gamesURL += `${property}=${searchParams[property]}&`;
         }
-        
-        fetch(apiURL)
+        var gameItems = await fetch(gamesURL)
         .then(async res => res.json())
-        .then(data => {
-            var autoCompleteItems = data.results;
-            var searchBar = this.state.searchBarRef.current;
-            searchBar.setState({ autoCompleteItems });
-        })
+        .then(data => data.results);
+
+        var movieItems = await (async () => {
+            if(gameItems.length === 5)
+                return [];
+
+            var moviesURL = 'https://api.themoviedb.org/3/search/movie?';
+            searchParams = {
+                api_key: '4a650f3febf12eb35af0857fc78a9608',
+                query: searchQuery,
+            }
+            for (const property in searchParams) {
+                moviesURL += `${property}=${searchParams[property]}&`;
+            }
+
+            var movies = await fetch(moviesURL)
+            .then(async res => res.json())
+            .then(data => data.results);
+
+            return movies.splice(0, 5);
+        })()
+
+        var autoCompleteItems = {
+            gameItems: gameItems,
+            movieItems: movieItems,
+        };
+        searchBarRef.current.setState({ autoCompleteItems });
     }
+
+
 
     resizeNav = () => {
         var selectionEl = this.state.selectionListRef.current;

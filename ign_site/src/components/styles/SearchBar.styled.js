@@ -14,7 +14,7 @@ export const StyledSearchBar = styled.form`
         display: flex;
         flex-direction: row;
         overflow: hidden;
-        border-radius: ${props => props.autoCompleteLen && props.searchInputFocused ? '8px 8px 0 0 ' : '20px'};
+        border-radius: ${props => !props.emptyAutoComplete && props.searchInputFocused ? '8px 8px 0 0 ' : '20px'};
         background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
         transition: background-color 0.4s linear;
 
@@ -56,7 +56,7 @@ export const StyledSearchBar = styled.form`
     }
 `;
 
-export const StyledAutoCompleteItem = styled.div.attrs(() => ({
+export const StyledAutoCompleteGame = styled.div.attrs(() => ({
     tabIndex: 0,
 }))`
     display: flex;
@@ -78,12 +78,11 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
         display: flex;
         align-items: center;
         justify-content: center;
-        /* background-color: {props => props.itemProps.background_image ? '#0f0f0f' : 'transparent'}; */
 
         img { 
-            width: auto;
+            flex: 1 0 auto;
             height: inherit;
-            object-fit: cover;
+            object-fit: fill;
         }
         svg {
             width: 15px;
@@ -96,7 +95,7 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
         flex-direction: column;
         overflow: hidden;
         padding-right: 5px;
-        justify-content: space-between;
+
 
         div {
             display: flex;
@@ -104,7 +103,7 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
             align-items: center;
 
             svg {
-                height: 15px;
+                height: 16px;
                 width: auto;
                 fill: #fff;
                 margin-right: 5px;
@@ -114,7 +113,6 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
                 font-size: 18px;
                 font-weight: 400;
                 letter-spacing: -2px;
-                color: #fff;
             }
         }
         h1 {
@@ -124,8 +122,30 @@ export const StyledAutoCompleteItem = styled.div.attrs(() => ({
             line-height: 18px;
             cursor: pointer;
             white-space: nowrap;
-            /* overflow: hidden;
-            text-overflow: ellipsis; */
+            margin: auto 0;
+        }
+    }
+`;
+
+export const StyledAutoCompleteMovie = styled(StyledAutoCompleteGame)`
+    height: 60px;
+
+    & .AutoComplete-Img {
+        height: 50px;
+        border-radius: 4px;
+    }
+    & .AutoComplete-Info {
+        flex: 1;
+        height: inherit;
+        padding: 5px 0;
+        justify-content: space-around !important;
+
+        h1 {
+            font-size: 16px;
+        }
+        h2 {
+            font-size: 14px;
+            font-weight: 500;
         }
     }
 `;

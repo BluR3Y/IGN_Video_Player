@@ -2,13 +2,16 @@ import React from "react";
 
 import {
     StyledSearchBar,
-    StyledAutoCompleteItem,
+    StyledAutoCompleteGame,
+    StyledAutoCompleteMovie,
     StyledLoadingAutoCompleteItem
 } from './styles/SearchBar.styled';
 
 import Magnifying_Glass from "../assets/icons/magnifying_glass";
+import Controller from '../assets/icons/controller';
+import Film from '../assets/icons/film';
 
-class AutoCompleteItem extends React.Component {
+class AutoCompleteGame extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -18,11 +21,6 @@ class AutoCompleteItem extends React.Component {
 
     componentDidMount() {
         this.getPlatforms(this.props.itemProps.parent_platforms);
-        
-    }
-
-    componentWillUnmount() {
-
     }
 
     componentDidUpdate(prevProps) {
@@ -57,11 +55,17 @@ class AutoCompleteItem extends React.Component {
         const { gamePlatforms } = this.state;
         if(gamePlatforms === null)
             return(<StyledLoadingAutoCompleteItem/>);
-        return(<StyledAutoCompleteItem
+        return(<StyledAutoCompleteGame
             onClick={this.props.onClick}
         >
             <div className="AutoComplete-Img">
-                {this.props.itemProps.background_image ? <img src={this.props.itemProps.background_image} /> : <Magnifying_Glass/>}
+                {this.props.itemProps.background_image ? 
+                    <img 
+                        src={this.props.itemProps.background_image} 
+                    /> 
+                    : 
+                    <Controller/>
+                }
             </div>
             <div className="AutoComplete-Info">
                 <div>
@@ -69,7 +73,30 @@ class AutoCompleteItem extends React.Component {
                 </div>
                 <h1>{this.props.itemProps.name}</h1>
             </div>
-        </StyledAutoCompleteItem>);
+        </StyledAutoCompleteGame>);
+    }
+}
+
+class AutoCompleteMovie extends React.Component {
+
+    render() {
+        return(<StyledAutoCompleteMovie
+            onClick={this.props.onClick}
+        >
+            <div className="AutoComplete-Img">
+                {this.props.itemProps.poster_path ? 
+                    <img
+                        src={'https://image.tmdb.org/t/p/w500' + this.props.itemProps.poster_path}
+                    />
+                    :
+                    <Film/>
+                }
+            </div>
+            <div className="AutoComplete-Info">
+                <h1>{this.props.itemProps.title}</h1>
+                <h2>{this.props.itemProps.release_date}</h2>
+            </div>
+        </StyledAutoCompleteMovie>);
     }
 }
 
@@ -82,6 +109,20 @@ export default class SearchBar extends React.Component {
             searchInputFocused: false,
             autoCompleteItems: null,
         }
+    }
+
+    componentDidMount() {
+        const { searchBarRef } = this.state;
+        const searchInput = searchBarRef.current.querySelector('input');
+        searchBarRef.current.addEventListener('submit', this.props.onSubmit);
+        searchInput.addEventListener('input', this.props.onInput);
+    }
+
+    componentWillUnmount() {
+        const { searchBarRef } = this.state;
+        const searchInput = searchBarRef.current.querySelector('input');
+        searchBarRef.current.removeEventListener('submit', this.props.onSubmit);
+        searchInput.removeEventListener('input', this.props.onInput);
     }
 
     toggleSearchFocus = (event) => {
@@ -113,8 +154,11 @@ export default class SearchBar extends React.Component {
             ref={this.state.searchBarRef} 
             open={this.state.openSearchBar} 
             searchInputFocused={this.state.searchInputFocused}
-            autoCompleteLen={this.state.autoCompleteItems ? this.state.autoCompleteItems.length : '0'}
-            onSubmit={this.props.onSubmit}
+            emptyAutoComplete={(() => {
+                if(this.state.autoCompleteItems === null)
+                    return true;
+                return (Math.max(this.state.autoCompleteItems.gameItems.length, this.state.autoCompleteItems.movieItems.length) === 0)
+            })()}
         >
             <div className="searchForm">
                 <button type='button' onClick={() => this.setState(prevState => ({ openSearchBar: !prevState.openSearchBar }))}>
@@ -124,19 +168,28 @@ export default class SearchBar extends React.Component {
                     type='text' 
                     placeholder="The Last of Us 2 Review" 
                     tabIndex='-1' 
-                    onInput={this.props.onInput}
                     onFocus={this.toggleSearchFocus}
                     onBlur={this.toggleSearchFocus}
                 />
             </div>
             <div className="searchAutoComplete">
-                {this.state.autoCompleteItems && this.state.autoCompleteItems.map(item => (
-                    <AutoCompleteItem
+                {this.state.autoCompleteItems &&
+                 this.state.autoCompleteItems.gameItems.map(item => (
+                    <AutoCompleteGame
                         key={item.id}
                         itemProps={item}
                         onClick={this.selectAutoComplete}
                     />
                 ))}
+                {this.state.autoCompleteItems &&
+                 this.state.autoCompleteItems.movieItems.map(item => (
+                    <AutoCompleteMovie
+                        key={item.id}
+                        itemProps={item}
+                        onClick={this.selectAutoComplete}
+                    />
+                 ))
+                }
             </div>
         </StyledSearchBar>);
     }
