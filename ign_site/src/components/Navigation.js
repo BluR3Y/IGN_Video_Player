@@ -17,6 +17,7 @@ import Caret_Down from '../assets/icons/caret_down';
 import Magnifying_Glass from '../assets/icons/magnifying_glass';
 import Sun from '../assets/icons/sun';
 import Moon from '../assets/icons/moon';
+import Menu_Bars from '../assets/icons/menu_bars';
 
 import ProfileImg from '../assets/images/profileImg.jfif';
 import SearchBar from "./SearchBar";
@@ -56,20 +57,28 @@ export default class Navigation extends React.Component {
                 { id: 9, title: "Marvel's The Defenders", link: 'https://www.ign.com/articles/2017/08/18/marvels-the-defenders-season-1-review'},
             ],
             selectionListRef: React.createRef(),
-            searchBarRef: React.createRef()
+            searchBarRef: React.createRef(),
+            currentDate: null,
         }
     }
 
     componentDidMount() {
         // Page Events
-        window.addEventListener('load', this.resizeNav)
-        window.addEventListener('resize', this.resizeNav);
+        window.addEventListener('load', function() {
+            this.resizeContentSelection();
+            this.getDate();
+            console.log('marker')
+        }.bind(this))
+        window.addEventListener('resize', this.resizeContentSelection);
     }
 
     componentWillUnmount() {
         // Page Events
-        window.removeEventListener('load', this.resizeNav)
-        window.removeEventListener('resize', this.resizeNav);
+        window.removeEventListener('load', function() {
+            this.resizeContentSelection();
+            this.getDate();
+        })
+        window.removeEventListener('resize', this.resizeContentSelection);
     }
 
     getDate = () => {
@@ -79,13 +88,7 @@ export default class Navigation extends React.Component {
 
         var currWeekday = weekDays[date.getDay()];
         var currDate = months[date.getMonth()] + ' ' + date.getDate();
-
-        return(
-            <h1>
-                <span>{currWeekday+','}</span>
-                <span>{currDate}</span>
-            </h1>
-        );
+        this.setState({ currentDate: [currWeekday, currDate] });
     }
 
     submitSearch = (event) => {
@@ -142,7 +145,7 @@ export default class Navigation extends React.Component {
     }
 
 
-    resizeNav = () => {
+    resizeContentSelection = () => {
         var selectionEl = this.state.selectionListRef.current;
         var averageWidth = 85;
         var numVisibleItems = selectionEl.offsetWidth / averageWidth;
@@ -153,50 +156,98 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        return(
-            <Nav_Container>
-                <div>
-                    <Date_Logo>
-                        <StyledLogo/>
-                        {this.getDate()}
-                    </Date_Logo>
-                    <ContentSelection>
-                        <SelectionList ref={this.state.selectionListRef}>
-                            {this.state.visibleItems.map((item) => (
-                                <a href={item.link} key={item.id}>{item.title}</a>
+        return(<Nav_Container>
+            <div className="navMain">
+                <Date_Logo>
+                    <StyledLogo/>
+                    {this.state.currentDate && (
+                        <h1>
+                            <span>{this.state.currentDate[0]}</span>
+                            <span>{this.state.currentDate[1]}</span>
+                        </h1>
+                    )}
+                </Date_Logo>
+                <ContentSelection>
+                    <SelectionList ref={this.state.selectionListRef}>
+                        {this.state.visibleItems.map((item) => (
+                            <a href={item.link} key={item.id}>{item.title}</a>
+                        ))}
+                    </SelectionList>
+                    <SelectionList_More>
+                        <h1>More</h1>
+                        <Caret_Down/>
+                        <div>
+                            {this.state.hiddenItems.map(item => (
+                                <a href={item.link} key={item.id} tabIndex='-1'>{item.title}</a>
                             ))}
-                        </SelectionList>
-                        <SelectionList_More>
-                            <h1>More</h1>
-                            <Caret_Down/>
-                            <div>
-                                {this.state.hiddenItems.map(item => (
-                                    <a href={item.link} key={item.id} tabIndex='-1'>{item.title}</a>
-                                ))}
-                            </div>
-                        </SelectionList_More>
-                        <SearchBar
-                            ref={this.state.searchBarRef}
-                            onSubmit={this.submitSearch}
-                            searchAutoComplete={this.searchAutoComplete}
-                        />
-                        <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
-                            <div>
-                                {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
-                            </div>
-                        </ThemeSelection>
-                        <Profile>
-                            <img src={ProfileImg}/>
-                            <h1>12</h1>
-                        </Profile>
-                    </ContentSelection>
-                </div>
-                <div>
-                    {this.state.additionalSelectionItems.map(item => (
-                        <a href={item.link} key={item.id}>{item.title}</a>
-                    ))}
-                </div>
-            </Nav_Container>
-        );
+                        </div>
+                    </SelectionList_More>
+                    <SearchBar
+                        ref={this.state.searchBarRef}
+                        onSubmit={this.submitSearch}
+                        searchAutoComplete={this.searchAutoComplete}
+                    />
+                    <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
+                        <div>
+                            {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
+                        </div>
+                    </ThemeSelection>
+                    <Profile>
+                        <img src={ProfileImg}/>
+                        <h1>12</h1>
+                    </Profile>
+                </ContentSelection>
+            </div>
+            <div className="navSub">
+                {this.state.additionalSelectionItems.map(item => (
+                    <a href={item.link} key={item.id}>{item.title}</a>
+                ))}
+            </div>
+        </Nav_Container>);
     }
 }
+        // return(
+        //     <Nav_Container>
+        //         <div>
+        //             <Date_Logo>
+        //                 <StyledLogo/>
+        //                 {this.getDate()}
+        //             </Date_Logo>
+        //             <ContentSelection>
+        //                 <SelectionList ref={this.state.selectionListRef}>
+        //                     {this.state.visibleItems.map((item) => (
+        //                         <a href={item.link} key={item.id}>{item.title}</a>
+        //                     ))}
+        //                 </SelectionList>
+        //                 <SelectionList_More>
+        //                     <h1>More</h1>
+        //                     <Caret_Down/>
+        //                     <div>
+        //                         {this.state.hiddenItems.map(item => (
+        //                             <a href={item.link} key={item.id} tabIndex='-1'>{item.title}</a>
+        //                         ))}
+        //                     </div>
+        //                 </SelectionList_More>
+        //                 <SearchBar
+        //                     ref={this.state.searchBarRef}
+        //                     onSubmit={this.submitSearch}
+        //                     searchAutoComplete={this.searchAutoComplete}
+        //                 />
+        //                 <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
+        //                     <div>
+        //                         {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
+        //                     </div>
+        //                 </ThemeSelection>
+        //                 <Profile>
+        //                     <img src={ProfileImg}/>
+        //                     <h1>12</h1>
+        //                 </Profile>
+        //             </ContentSelection>
+        //         </div>
+        //         <div>
+        //             {this.state.additionalSelectionItems.map(item => (
+        //                 <a href={item.link} key={item.id}>{item.title}</a>
+        //             ))}
+        //         </div>
+        //     </Nav_Container>
+        // );

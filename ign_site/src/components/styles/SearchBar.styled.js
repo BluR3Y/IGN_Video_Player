@@ -3,30 +3,29 @@ import styled from "styled-components";
 
 export const StyledSearchBar = styled.form`
     height: 30px;
-    width: ${props => props.open ? '100%' : '30px'};
-    margin: 0 10px;
-    transition: width 0.4s linear;
+    width: 30px;
     position: relative;
+    flex: ${props => props.open ? '1 1 0' : '0 0 0'};
+    transition: flex 0.4s linear;
 
     .searchForm {
-        flex: 1 1 0;
         height: inherit;
         display: flex;
         flex-direction: row;
         overflow: hidden;
         border-radius: ${props => !props.emptyAutoComplete && props.searchInputFocused ? '8px 8px 0 0 ' : '20px'};
         background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
-        transition: background-color 0.4s linear;
+        transition: background-color 0.4s ease;
 
         button {
             flex: 0 0 30px;
             height: 30px;
             border: none;
-            border-radius: 50%;
+            border-radius: ${props => !props.emptyAutoComplete && props.searchInputFocused ? '8px' : '50%'};
             display: flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
+            background-color: transparent;
             cursor: pointer;
 
             svg {
@@ -49,7 +48,7 @@ export const StyledSearchBar = styled.form`
         display: ${props => props.searchInputFocused ? 'block' : 'none'};
         position: absolute;
         top: 100%;
-        width: inherit;
+        width: 100%;
         border-radius: 0 0 8px 8px;
         overflow: hidden;
         background-color: ${props => props.theme.tertiary};

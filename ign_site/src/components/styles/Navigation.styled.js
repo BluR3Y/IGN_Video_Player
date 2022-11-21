@@ -1,66 +1,137 @@
 import styled, { css } from "styled-components";
+import { breakPoints, deviceSizes } from './breakPoints';
+import { StyledSearchBar } from "./SearchBar.styled";
 
-import IGN_Logo from '../../assets/icons/ign_logo';
+import { IGN_Logo_White, IGN_Logo_Color } from '../../assets/icons/ign_logo';
+
+// export const Nav_Container = styled.div`
+//     display: flex;
+//     flex-direction: column;
+//     box-shadow: 0 1px #cdcdcd;
+
+//     & > div {
+//         display: flex;
+//         flex-direction: row;
+//         padding: 0 120px;
+//     }
+
+//     & > div:nth-child(1) {
+//         padding-top: 20px;
+//         padding-bottom: 20px;
+//         justify-content: space-between;
+//         background-color: ${props => props.theme.secondary};
+//     }
+
+//     & > div:nth-child(2) {
+//         align-items: center;
+//         flex-wrap: wrap;
+//         justify-content: space-evenly;
+//         height: 45px;
+//         overflow: hidden;
+//         user-select: none;
+//         background-color: ${props => props.theme.tertiary};
+//     }
+
+//     & > div:nth-child(2) a {
+//         text-decoration: none;
+//         font-family: Lato;
+//         font-weight: 700;
+//         font-size: 15px;
+//         color: #404041;
+//         line-height: 25px;
+//         padding: 0 28px;
+//         margin: 12px 0;
+//         border-left: 1px solid ${props => props.theme.primary};
+//     }
+//     & > div:nth-child(2) a:first-child {
+//         border-left: none;
+//     }
+// `;
 
 export const Nav_Container = styled.div`
     display: flex;
     flex-direction: column;
     box-shadow: 0 1px #cdcdcd;
 
-    & > div {
+    .navMain {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .navSub {
         display: flex;
         flex-direction: row;
-        padding: 0 120px;
-    }
-
-    & > div:nth-child(1) {
-        padding-top: 20px;
-        padding-bottom: 20px;
-        justify-content: space-between;
-        background-color: ${props => props.theme.secondary};
-    }
-
-    & > div:nth-child(2) {
-        align-items: center;
-        flex-wrap: wrap;
-        justify-content: space-evenly;
-        height: 45px;
-        overflow: hidden;
-        user-select: none;
         background-color: ${props => props.theme.tertiary};
+        height: 40px;
+        align-items: center;
+        overflow-x: scroll;
+        overflow-y: hidden;
+
+        a {
+            text-decoration: none;
+            font-family: Lato;
+            font-weight: 700;
+            font-size: 15px;
+            color: #404041;
+            line-height: 25px;
+            padding: 0 28px;
+            white-space: nowrap;
+            /* margin: 12px 0; */
+            border-left: 1px solid ${props => props.theme.primary};
+        }
+        a:first-child {
+            border-left: none;
+        }
+    }
+    .navSub::-webkit-scrollbar {
+        display: none;
     }
 
-    & > div:nth-child(2) a {
-        text-decoration: none;
-        font-family: Lato;
-        font-weight: 700;
-        font-size: 15px;
-        color: #404041;
-        line-height: 25px;
-        padding: 0 28px;
-        margin: 12px 0;
-        border-left: 1px solid ${props => props.theme.primary};
+    @media ${breakPoints.laptop} {
+        & > div {
+            padding: 0 80px;
+        }
+        
+        .navMain {
+            flex-direction: row;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            justify-content: space-between;
+        }
     }
-    & > div:nth-child(2) a:first-child {
-        border-left: none;
+
+    @media ${breakPoints.desktop} {
+        & > div {
+            padding: 0 120px;
+        }
     }
 `;
 
-export const StyledLogo = styled(IGN_Logo)`
-    width: 160px;
-    height: auto;
+export const StyledLogo = styled.a.attrs((props) => ({
+    href: 'https://www.ign.com/',
+    target: '_blank',
+    children: (() => props.theme.type === 'classic' ? <IGN_Logo_Color/> : <IGN_Logo_White/>)(),
+}))`
+    height: 100%;
+    svg {
+        height: inherit;
+        width: fit-content;
+    }
 `;
+
 
 export const Date_Logo = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
     user-select: none;
-    height: 50px;
+    justify-content: center;
+    height: 45px;
+    padding: 5px 0;
 
     h1 {
         height: inherit;
-        display: flex;
+        display: none; // flex for web
         flex-direction : column;
         font-size: 22px;
         line-height: 22px;
@@ -68,35 +139,79 @@ export const Date_Logo = styled.div`
         margin-left: 15px;
         white-space: nowrap;
     }
+
+    @media ${breakPoints.laptop} {
+        h1 {
+            display: flex;
+        }
+    }
 `;
 
 export const ContentSelection = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-left: 40px;
-    max-width: 700px;
+    flex: 1 1 0;
     height: 50px;
     user-select: none;
+    padding: 8px 10px;
+
+    ${StyledSearchBar} {
+        max-width: 500px;
+    }
+
+    @media (max-width: ${deviceSizes.minLaptop - 1}px) {
+        ${StyledSearchBar} {
+            flex: 1 1 0;
+
+            .searchForm {
+                background-color: ${props => props.theme.tertiary};
+            }
+
+            button {
+                pointer-events: none;
+            }
+        }
+    }
+    
+    @media ${breakPoints.tablet} {
+        ${StyledSearchBar} {
+            margin-right: auto;
+        }
+    }
+    @media ${breakPoints.laptop} {
+        ${StyledSearchBar} {
+            margin: unset;
+        }
+    }
+
+    @media ${breakPoints.laptop} {
+        margin-left: 40px;
+        padding: 0;
+    }
 `;
 
 export const SelectionList = styled(ContentSelection)`
-    height: inherit;
-    flex: 1 1 0 !important;
-    justify-content: space-evenly !important;
-    margin: 0;
+    justify-content: flex-end !important;
     overflow: hidden;
+    display:none;
+    margin-left: auto;
+    max-width: 450px;
 
     a {
         text-decoration: none;
         color: black;
         font-size: 20px;
-        margin: 10px;
+        margin-left: 15px;
+    }
+
+    @media ${breakPoints.laptop} {
+        display: flex;
     }
 `;
 
 export const SelectionList_More = styled.button`
-    display: flex;
+    display: none;  //flex for web view
     flex-direction: row;
     align-items: center;
     height: inherit;
@@ -146,111 +261,19 @@ export const SelectionList_More = styled.button`
         overflow: visible;
         background-color: ${props => props.theme.primary};
     }
-`;
 
-// export const SearchBox = styled.form`
-//     height: 30px;
-//     width: ${props => props.open ? '100%' : '30px'};
-//     margin: 0 10px;
-//     transition: width 0.4s linear;
-//     position: relative;
-
-//     .searchForm {
-//         flex: 1 1 0;
-//         height: inherit;
-//         display: flex;
-//         flex-direction: row;
-//         overflow: hidden;
-//         border-radius: ${props => props.autoCompleteLen && props.searchInputFocused ? '8px 8px 0 0 ' : '20px'};
-//         background-color: ${props => props.open ? props.theme.tertiary : 'transparent'};
-//         transition: background-color 0.4s linear;
-
-//         button {
-//             flex: 0 0 30px;
-//             height: 30px;
-//             border: none;
-//             border-radius: 50%;
-//             display: flex;
-//             align-items: center;
-//             justify-content: center;
-//             background: transparent;
-//             cursor: pointer;
-
-//             svg {
-//                 width: 20px;
-//             }
-//         }
-//         button:hover {
-//             background-color: ${props => props.theme.quaternary};
-//         }
-
-//         input {
-//             flex: 1;
-//             border: none;
-//             font-size: 16px;
-//             padding: 0 5px;
-//             background: transparent;
-//         }
-//     }
-//     .searchAutoComplete {
-//         display: ${props => props.searchInputFocused ? 'block' : 'none'};
-//         position: absolute;
-//         top: 100%;
-//         width: inherit;
-//         border-radius: 0 0 8px 8px;
-//         overflow: hidden;
-//         background-color: ${props => props.theme.tertiary};
-//     }
-// `;
-
-// export const AutoCompleteItem = styled.div`
-//     display: flex;
-//     flex-direction: row;
-//     align-items: center;
-//     cursor: pointer;
-//     height: 48px;
-//     z-index: 2;
+    @media ${breakPoints.laptop} {
+        display: flex;
+    }
     
-//     &:hover {
-//         background-color: ${props => props.theme.primary};
-//     }
-
-//     div {
-//         width: 40px;
-//         height: 40px;
-//         border-radius: 8px;
-//         margin: 0 10px;
-//         overflow: hidden;
-//         display: flex;
-//         align-items: center;
-//         justify-content: center;
-//         background-color: ${props => props.itemProps.background_image ? '#0f0f0f' : 'transparent'};
-
-//         img { 
-//             width: auto;
-//             height: inherit;
-//             object-fit: cover;
-//         }
-//         svg {
-//             width: 15px;
-//         }
-//     }
-
-//     h1 {
-//         flex: 1 1 0;
-//         font-size: 16px;
-//         font-weight: 500;
-//         line-height: 18px;
-//         cursor: pointer;
-//     }
-// `;
+`;
 
 export const ThemeSelection = styled.button`
     flex: 0 0 65px;
     height: 32px;
     border-radius: 20px;
     border: 2px solid black;
-    display: flex;
+    display: none;  // flex for web
     background: transparent;
     align-items: center;
     position: relative;
@@ -285,6 +308,16 @@ export const ThemeSelection = styled.button`
         width: 17px;
         fill: ${props => props.theme.secondary};
     }
+
+    @media ${breakPoints.tablet} {
+        display: flex;
+    }
+    @media ${breakPoints.laptop} {
+        display:none;
+    }
+    @media ${breakPoints.desktop} {
+        display: flex;
+    }
 `;
 
 export const Profile = styled.a.attrs({
@@ -294,7 +327,7 @@ export const Profile = styled.a.attrs({
 })`
     flex: 0 0 50px;
     height: 50px;
-    display: flex;
+    display: none;  // flex for web view
     justify-content: center;
     align-items: center;
     position: relative;
@@ -320,5 +353,15 @@ export const Profile = styled.a.attrs({
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    @media ${breakPoints.tablet} {
+        display: flex;
+    }
+    @media ${breakPoints.laptop} {
+        display: none;
+    }
+    @media ${breakPoints.desktop} {
+        display: flex;
     }
 `;
