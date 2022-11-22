@@ -2,27 +2,26 @@ import React from "react";
 
 import {
     StyledSearchBar,
-    StyledAutoCompleteItem,
+    StyledAutoCompleteGame,
+    StyledAutoCompleteMovie,
     StyledLoadingAutoCompleteItem
 } from './styles/SearchBar.styled';
 
 import Magnifying_Glass from "../assets/icons/magnifying_glass";
+import Controller from '../assets/icons/controller';
+import Film from '../assets/icons/film';
 
-class AutoCompleteItem extends React.Component {
+class AutoCompleteGame extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             gamePlatforms: null,
+            imageLoaded: (this.props.itemProps.background_image ? false : true),
         }
     }
 
     componentDidMount() {
         this.getPlatforms(this.props.itemProps.parent_platforms);
-        
-    }
-
-    componentWillUnmount() {
-
     }
 
     componentDidUpdate(prevProps) {
@@ -54,22 +53,68 @@ class AutoCompleteItem extends React.Component {
     }
 
     render() {
-        const { gamePlatforms } = this.state;
-        if(gamePlatforms === null)
-            return(<StyledLoadingAutoCompleteItem/>);
-        return(<StyledAutoCompleteItem
+        const { gamePlatforms, imageLoaded } = this.state;
+        return(
+            <>
+            <StyledAutoCompleteGame
+                onClick={this.props.onClick}
+                isLoaded={gamePlatforms !== null && imageLoaded}
+            >
+                <div className="AutoComplete-Img">
+                    {this.props.itemProps.background_image ? 
+                        <img 
+                            src={this.props.itemProps.background_image} 
+                            onLoad={() => this.setState({ imageLoaded: true })}
+                        /> 
+                        : 
+                        <Controller />
+                    }
+                </div>
+                <div className="AutoComplete-Info">
+                    <div>
+                        {this.state.gamePlatforms && this.state.gamePlatforms.map((Item, index) => (<Item key={index}/>))}
+                    </div>
+                    <h1>{this.props.itemProps.name}</h1>
+                </div>
+            </StyledAutoCompleteGame>
+            {(!imageLoaded || gamePlatforms === null) && (<StyledLoadingAutoCompleteItem/>)}
+            </>
+        );
+    }
+}
+
+class AutoCompleteMovie extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            imageLoaded: (this.props.itemProps.poster_path ? true : true)
+        }
+    }
+
+    render() {
+        const { imageLoaded } = this.state;
+        return(<>
+        <StyledAutoCompleteMovie
             onClick={this.props.onClick}
+            isLoaded={imageLoaded}
         >
             <div className="AutoComplete-Img">
-                {this.props.itemProps.background_image ? <img src={this.props.itemProps.background_image} /> : <Magnifying_Glass/>}
+                {this.props.itemProps.poster_path ? 
+                    <img
+                        src={'https://image.tmdb.org/t/p/w500' + this.props.itemProps.poster_path}
+                        onLoad={() => this.setState({ imageLoaded: true })}
+                    />
+                    :
+                    <Film/>
+                }
             </div>
             <div className="AutoComplete-Info">
-                <div>
-                    {this.state.gamePlatforms.map((Item, index) => (<Item key={index}/>))}
-                </div>
-                <h1>{this.props.itemProps.name}</h1>
+                <h1>{this.props.itemProps.title}</h1>
+                <h2>{this.props.itemProps.release_date}</h2>
             </div>
-        </StyledAutoCompleteItem>);
+        </StyledAutoCompleteMovie>
+        {!imageLoaded && (<StyledLoadingAutoCompleteItem/>)}
+        </>);
     }
 }
 
@@ -77,11 +122,27 @@ export default class SearchBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            searchQuery: '',
             searchBarRef: React.createRef(),
             openSearchBar: false,
             searchInputFocused: false,
             autoCompleteItems: null,
+            typingTimeout: 0,
         }
+    }
+
+    componentDidMount() {
+        const { searchBarRef } = this.state;
+        const searchInput = searchBarRef.current.querySelector('input');
+        searchBarRef.current.addEventListener('submit', this.props.onSubmit);
+        searchInput.addEventListener('input', this.updateQuery);
+    }
+
+    componentWillUnmount() {
+        const { searchBarRef } = this.state;
+        const searchInput = searchBarRef.current.querySelector('input');
+        searchBarRef.current.removeEventListener('submit', this.props.onSubmit);
+        searchInput.removeEventListener('input', this.updateQuery);
     }
 
     toggleSearchFocus = (event) => {
@@ -95,7 +156,7 @@ export default class SearchBar extends React.Component {
             })
         }else{
             if(this.state.autoCompleteItems === null)
-                this.props.onInput(event);
+                this.props.searchAutoComplete(this.state.searchQuery);
             this.setState(prevState => ({ searchInputFocused: !prevState.searchInputFocused }));
         }
     }
@@ -108,13 +169,29 @@ export default class SearchBar extends React.Component {
         searchBarRef.dispatchEvent(new Event('submit'));
     }
 
+    updateQuery = (event) => {
+        if(this.state.typingTimeout) {
+            clearTimeout(this.state.typingTimeout);
+        }
+
+        this.setState({
+            searchQuery: event.target.value,
+            typingTimeout: setTimeout(function () {
+                this.props.searchAutoComplete(this.state.searchQuery);
+            }.bind(this), 150)
+        })
+    }
+
     render() {
         return(<StyledSearchBar
             ref={this.state.searchBarRef} 
             open={this.state.openSearchBar} 
             searchInputFocused={this.state.searchInputFocused}
-            autoCompleteLen={this.state.autoCompleteItems ? this.state.autoCompleteItems.length : '0'}
-            onSubmit={this.props.onSubmit}
+            emptyAutoComplete={(() => {
+                if(this.state.autoCompleteItems === null)
+                    return true;
+                return (Math.max(this.state.autoCompleteItems.gameItems.length, this.state.autoCompleteItems.movieItems.length) === 0)
+            })()}
         >
             <div className="searchForm">
                 <button type='button' onClick={() => this.setState(prevState => ({ openSearchBar: !prevState.openSearchBar }))}>
@@ -124,19 +201,28 @@ export default class SearchBar extends React.Component {
                     type='text' 
                     placeholder="The Last of Us 2 Review" 
                     tabIndex='-1' 
-                    onInput={this.props.onInput}
                     onFocus={this.toggleSearchFocus}
                     onBlur={this.toggleSearchFocus}
                 />
             </div>
             <div className="searchAutoComplete">
-                {this.state.autoCompleteItems && this.state.autoCompleteItems.map(item => (
-                    <AutoCompleteItem
+                {this.state.autoCompleteItems &&
+                 this.state.autoCompleteItems.gameItems.map(item => (
+                    <AutoCompleteGame
                         key={item.id}
                         itemProps={item}
                         onClick={this.selectAutoComplete}
                     />
                 ))}
+                {this.state.autoCompleteItems &&
+                 this.state.autoCompleteItems.movieItems.map(item => (
+                    <AutoCompleteMovie
+                        key={item.id}
+                        itemProps={item}
+                        onClick={this.selectAutoComplete}
+                    />
+                 ))
+                }
             </div>
         </StyledSearchBar>);
     }

@@ -10,12 +10,14 @@ export default class App extends React.Component {
         this.state = {
             siteThemes: {
                 classic: {
+                    type: 'classic',
                     primary: '#bf1313',
                     secondary: '#ffffff',
                     tertiary: '#bbc4c4',
                     quaternary: '#41495a'
                 },
                 dark: {
+                    type: 'dark',
                     primary: '#bf1313',
                     secondary: '#41495a',
                     tertiary: '#bbc4c4',
