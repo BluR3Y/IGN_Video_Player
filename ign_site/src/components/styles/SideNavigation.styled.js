@@ -146,11 +146,12 @@ export const ThemeToggle = styled.div`
         z-index: 1;
         -webkit-tap-highlight-color: transparent;
 
-
         svg {
             height: inherit;
+            fill: ${props=>props.theme.quaternary};
         }
     }
+
     ${props => props.theme.type === 'classic' && css`
         .classicBtn {
             pointer-events: none;
