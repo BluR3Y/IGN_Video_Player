@@ -88,8 +88,8 @@ export const Date_Logo = styled.div`
     align-items: center;
     user-select: none;
     justify-content: center;
-    height: 45px;
-    padding: 5px 0;
+    height: 50px;
+    padding: 8px 0;
 
     h1 {
         height: inherit;

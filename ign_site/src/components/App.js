@@ -3,6 +3,7 @@ import React, { Fragment } from "react";
 import GlobalStyles from './styles/GlobalStyles';
 import Navigation from "./Navigation";
 import { ThemeProvider } from "styled-components";
+import SideNavigation from "./SideNavigation";
 
 export default class App extends React.Component {
     constructor(props) {
@@ -37,6 +38,7 @@ export default class App extends React.Component {
             <ThemeProvider theme={this.state.siteThemes[this.state.activeTheme]}>
                 <GlobalStyles/>
                 <Navigation activeTheme={this.state.activeTheme} toggleTheme={this.toggleTheme}/>
+                <SideNavigation activeTheme={this.state.activeTheme} toggleTheme={this.toggleTheme} />
             </ThemeProvider>
         );
     }
