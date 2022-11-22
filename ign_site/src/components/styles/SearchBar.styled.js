@@ -190,7 +190,7 @@ export const StyledLoadingAutoCompleteItem = styled.div.attrs(props => ({
             border-radius: 8px;
             background: linear-gradient(-45deg, #9c9996, #9cabab, #919191, #747372);
             background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            animation: gradient 8s ease infinite;
         }
 
         div:nth-child(1) {
@@ -216,45 +216,3 @@ export const StyledLoadingAutoCompleteItem = styled.div.attrs(props => ({
 	}
 }
 `;
-
-// export const AutoCompleteItem = styled.div`
-    // display: flex;
-    // flex-direction: row;
-    // align-items: center;
-    // cursor: pointer;
-    // height: 48px;
-    // z-index: 2;
-    
-    // &:hover {
-    //     background-color: ${props => props.theme.primary};
-    // }
-
-    // div {
-    //     width: 40px;
-    //     height: 40px;
-    //     border-radius: 8px;
-    //     margin: 0 10px;
-    //     overflow: hidden;
-    //     display: flex;
-    //     align-items: center;
-    //     justify-content: center;
-    //     background-color: ${props => props.itemProps.background_image ? '#0f0f0f' : 'transparent'};
-
-    //     img { 
-    //         width: auto;
-    //         height: inherit;
-    //         object-fit: cover;
-    //     }
-    //     svg {
-    //         width: 15px;
-    //     }
-    // }
-
-//     h1 {
-//         flex: 1 1 0;
-//         font-size: 16px;
-//         font-weight: 500;
-//         line-height: 18px;
-//         cursor: pointer;
-//     }
-// `;

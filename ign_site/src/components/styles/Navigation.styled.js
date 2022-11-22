@@ -4,54 +4,11 @@ import { StyledSearchBar } from "./SearchBar.styled";
 
 import { IGN_Logo_White, IGN_Logo_Color } from '../../assets/icons/ign_logo';
 
-// export const Nav_Container = styled.div`
-//     display: flex;
-//     flex-direction: column;
-//     box-shadow: 0 1px #cdcdcd;
-
-//     & > div {
-//         display: flex;
-//         flex-direction: row;
-//         padding: 0 120px;
-//     }
-
-//     & > div:nth-child(1) {
-//         padding-top: 20px;
-//         padding-bottom: 20px;
-//         justify-content: space-between;
-//         background-color: ${props => props.theme.secondary};
-//     }
-
-//     & > div:nth-child(2) {
-//         align-items: center;
-//         flex-wrap: wrap;
-//         justify-content: space-evenly;
-//         height: 45px;
-//         overflow: hidden;
-//         user-select: none;
-//         background-color: ${props => props.theme.tertiary};
-//     }
-
-//     & > div:nth-child(2) a {
-//         text-decoration: none;
-//         font-family: Lato;
-//         font-weight: 700;
-//         font-size: 15px;
-//         color: #404041;
-//         line-height: 25px;
-//         padding: 0 28px;
-//         margin: 12px 0;
-//         border-left: 1px solid ${props => props.theme.primary};
-//     }
-//     & > div:nth-child(2) a:first-child {
-//         border-left: none;
-//     }
-// `;
-
 export const Nav_Container = styled.div`
     display: flex;
     flex-direction: column;
     box-shadow: 0 1px #cdcdcd;
+    user-select: none;
 
     .navMain {
         display: flex;
@@ -65,7 +22,7 @@ export const Nav_Container = styled.div`
         height: 40px;
         align-items: center;
         overflow-x: scroll;
-        overflow-y: hidden;
+        flex-wrap: nowrap;
 
         a {
             text-decoration: none;
@@ -76,7 +33,7 @@ export const Nav_Container = styled.div`
             line-height: 25px;
             padding: 0 28px;
             white-space: nowrap;
-            /* margin: 12px 0; */
+            margin: 8px 0;
             border-left: 1px solid ${props => props.theme.primary};
         }
         a:first-child {
@@ -97,6 +54,11 @@ export const Nav_Container = styled.div`
             padding-top: 20px;
             padding-bottom: 20px;
             justify-content: space-between;
+        }
+        .navSub {
+            justify-content: center;
+            overflow: hidden;
+            flex-wrap: wrap;
         }
     }
 
@@ -151,6 +113,7 @@ export const ContentSelection = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: flex-end;
     flex: 1 1 0;
     height: 50px;
     user-select: none;
@@ -161,6 +124,7 @@ export const ContentSelection = styled.div`
     }
 
     @media (max-width: ${deviceSizes.minLaptop - 1}px) {
+        background-color: ${props => props.theme.primary};
         ${StyledSearchBar} {
             flex: 1 1 0;
 
@@ -192,17 +156,23 @@ export const ContentSelection = styled.div`
 `;
 
 export const SelectionList = styled(ContentSelection)`
-    justify-content: flex-end !important;
+    flex: 1 1 0;
+    display: none;
+    flex-direction: row;
+    justify-content: flex-end;
     overflow: hidden;
-    display:none;
-    margin-left: auto;
-    max-width: 450px;
+    flex-wrap: wrap;
 
-    a {
-        text-decoration: none;
-        color: black;
-        font-size: 20px;
-        margin-left: 15px;
+    div {
+        height: inherit;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        a {
+            text-decoration: none;
+            color: black;
+            font-size: 20px;
+        }
     }
 
     @media ${breakPoints.laptop} {
@@ -364,4 +334,28 @@ export const Profile = styled.a.attrs({
     @media ${breakPoints.desktop} {
         display: flex;
     }
+`;
+
+export const StyledLoadingAdditionalContent = styled.div`
+    height: 50%;
+    width: 120px;
+    flex-shrink: 0;
+    border-radius: 20px;
+    margin: 10px 10px;
+    background: linear-gradient(-45deg, #9c9996, #9cabab, #919191, #747372);
+    background-size: 400% 400%;
+    animation: gradient 8s ease infinite;
+
+    @keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+
+    background-color: red;
 `;
