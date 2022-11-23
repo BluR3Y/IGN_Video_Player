@@ -56,7 +56,7 @@ const GlobalStyles = createGlobalStyle`
     body {
         font-family: 'Poppins', sans-serif;
         font-size: 1.15em;
-        background-color: ${props => props.theme.secondary};
+        background-color: ${props => props.theme.type === 'classic' ? '#f6f8f7' : '#202634'};
     }
 
     svg {
@@ -68,6 +68,16 @@ const GlobalStyles = createGlobalStyle`
     textarea:focus,
     button:focus {
         outline: none;
+    }
+
+    button, input[type="submit"], input[type="reset"] {
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
     }
 `;
 

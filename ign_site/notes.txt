@@ -31,3 +31,7 @@ ToDo:
         * For storing the whole state tree of application
         * https://redux.js.org/api/store
     
+
+
+Tools: 
+    - Manifest Generator: https://www.simicart.com/manifest-generator.html/
