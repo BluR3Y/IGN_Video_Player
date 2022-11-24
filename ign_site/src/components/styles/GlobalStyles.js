@@ -53,6 +53,12 @@ const GlobalStyles = createGlobalStyle`
         box-sizing: border-box;
     }
 
+    html,
+    body,
+    #root {
+        height: 100%;
+    }
+
     body {
         font-family: 'Poppins', sans-serif;
         font-size: 1.15em;

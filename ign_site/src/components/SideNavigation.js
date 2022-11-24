@@ -29,24 +29,42 @@ export default class SideNavigation extends React.Component {
         this.state = {
             openSideNav: false,
             openPage: 'mainPage',
-            currentDate: ['Monday','December 15']
+            currentDate: null,
         }
     }
 
+    componentDidMount() {
+        this.getDate();
+    }
+
+    getDate = () => {
+        var date = new Date();
+        var weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var currWeekday = weekDays[date.getDay()];
+        var currDate = months[date.getMonth()] + ' ' + date.getDate();
+        this.setState({ currentDate: [currWeekday, currDate] });
+    }
+
     render() {
+
+        const { openSideNav, openPage, currentDate } = this.state;
+
         return(<StyledSideNavigation
-            open={this.state.openSideNav}
+            open={openSideNav}
         >
             <div className="navMain">
                 <StyledHamburgerButton onClick={() => this.setState(prevState => ({ openSideNav: !prevState.openSideNav }))} />
-                <NavContent openPage={this.state.openPage}>
-                    <ContentPage className="mainPage" activePage={this.state.openPage}>
+                <NavContent openPage={openPage}>
+                    <ContentPage className="mainPage" activePage={openPage}>
                         <Date_Logo>
                             <StyledLogo/>
-                            <h1>
-                                <span>{this.state.currentDate[0]}</span>
-                                <span>{this.state.currentDate[1]}</span>
-                            </h1>
+                            {currentDate && (
+                                <h1>
+                                    <span>{currentDate[0]}</span>
+                                    <span>{currentDate[1]}</span>
+                                </h1>
+                            )}
                         </Date_Logo>
                         <StyledProfile>
                             <StyledProfileImg/>
@@ -80,6 +98,7 @@ export default class SideNavigation extends React.Component {
                     </ContentPage>
                     <ContentPage className="newsPage">
                         <ReturnMainPage onClick={() => this.setState({ openPage: 'mainPage' })}/>
+                        <h1 className="pageTitle">News</h1>
                         <ContentList className="newsContent">
                             <ContentLink href='https://www.ign.com/news'>
                                 <h1>All News</h1>
@@ -115,6 +134,7 @@ export default class SideNavigation extends React.Component {
                     </ContentPage>
                     <ContentPage className="videosPage">
                         <ReturnMainPage onClick={() => this.setState({ openPage: 'mainPage' })}/>
+                        <h1 className="pageTitle">Videos</h1>
                         <ContentList className="videosContent">
                             <ContentLink  href='https://www.ign.com/watch'>
                                 <h1>Original Shows</h1>
@@ -135,6 +155,7 @@ export default class SideNavigation extends React.Component {
                     </ContentPage>
                     <ContentPage className="reviewsPage">
                         <ReturnMainPage onClick={() => this.setState({ openPage: 'mainPage' })}/>
+                        <h1 className="pageTitle">Reviews</h1>
                         <ContentList className="reviewsContent">
                             <ContentLink href='https://www.ign.com/reviews'>
                                 <h1>All Reviews</h1>
@@ -158,6 +179,7 @@ export default class SideNavigation extends React.Component {
                     </ContentPage>
                     <ContentPage className="morePage">
                         <ReturnMainPage onClick={() => this.setState({ openPage: 'mainPage' })}/>
+                        <h1 className="pageTitle">More</h1>
                         <ContentList className="moreContent">
                             <ContentLink href='https://www.ign.com/wikis/ign-community-central/How_to_Follow_IGN'>
                                 <h1>IGN on social</h1>

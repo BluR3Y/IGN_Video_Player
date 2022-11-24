@@ -72,7 +72,7 @@ class AutoCompleteGame extends React.Component {
                 </div>
                 <div className="AutoComplete-Info">
                     <div>
-                        {this.state.gamePlatforms && this.state.gamePlatforms.map((Item, index) => (<Item key={index}/>))}
+                        {gamePlatforms && gamePlatforms.map((Item, index) => (<Item key={index}/>))}
                     </div>
                     <h1>{this.props.itemProps.name}</h1>
                 </div>
@@ -183,14 +183,15 @@ export default class SearchBar extends React.Component {
     }
 
     render() {
+        const { searchBarRef, openSearchBar, autoCompleteItems, searchInputFocused } = this.state;
         return(<StyledSearchBar
-            ref={this.state.searchBarRef} 
-            open={this.state.openSearchBar} 
-            searchInputFocused={this.state.searchInputFocused}
+            ref={searchBarRef} 
+            open={openSearchBar} 
+            searchInputFocused={searchInputFocused}
             emptyAutoComplete={(() => {
-                if(this.state.autoCompleteItems === null)
+                if(autoCompleteItems === null)
                     return true;
-                return (Math.max(this.state.autoCompleteItems.gameItems.length, this.state.autoCompleteItems.movieItems.length) === 0)
+                return (Math.max(autoCompleteItems.gameItems.length, autoCompleteItems.movieItems.length) === 0)
             })()}
         >
             <div className="searchForm">
@@ -206,16 +207,16 @@ export default class SearchBar extends React.Component {
                 />
             </div>
             <div className="searchAutoComplete">
-                {this.state.autoCompleteItems &&
-                 this.state.autoCompleteItems.gameItems.map(item => (
+                {autoCompleteItems &&
+                 autoCompleteItems.gameItems.map(item => (
                     <AutoCompleteGame
                         key={item.id}
                         itemProps={item}
                         onClick={this.selectAutoComplete}
                     />
                 ))}
-                {this.state.autoCompleteItems &&
-                 this.state.autoCompleteItems.movieItems.map(item => (
+                {autoCompleteItems &&
+                 autoCompleteItems.movieItems.map(item => (
                     <AutoCompleteMovie
                         key={item.id}
                         itemProps={item}
