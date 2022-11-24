@@ -4,6 +4,39 @@ import { StyledSearchBar } from "./SearchBar.styled";
 
 import { IGN_Logo_White, IGN_Logo_Color } from '../../assets/icons/ign_logo';
 
+export const StyledLogo = styled.a.attrs((props) => ({
+    href: 'https://www.ign.com/',
+    target: '_blank',
+    children: (() => props.theme.type === 'classic' ? <IGN_Logo_Color/> : <IGN_Logo_White/>)(),
+}))`
+    height: 100%;
+    svg {
+        height: inherit;
+        width: fit-content;
+    }
+`;
+
+export const Date_Logo = styled.div`
+    display: flex;
+    font-size: 20px;
+    flex-direction: row;
+    align-items: center;
+    width: fit-content;
+
+    svg {
+        margin-right: 0.6em;
+    }
+
+    h1 {
+        font-size: 1em;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1em;
+        color: ${props => props.theme.type === 'classic' ? '#000' : props.theme.quaternary};
+        white-space: nowrap;
+    }
+`;
+
 export const Nav_Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -13,6 +46,20 @@ export const Nav_Container = styled.div`
     .navMain {
         display: flex;
         flex-direction: column;
+
+        ${Date_Logo} {
+            align-self: center;
+            height: 50px;
+        }
+        
+        @media (max-width: ${deviceSizes.minLaptop}px) {
+            ${Date_Logo} {
+                padding: 8px 0;
+            }
+            ${Date_Logo} > h1 {
+                display: none;
+            }
+        }
     }
 
     .navSub {
@@ -69,46 +116,6 @@ export const Nav_Container = styled.div`
     }
 `;
 
-export const StyledLogo = styled.a.attrs((props) => ({
-    href: 'https://www.ign.com/',
-    target: '_blank',
-    children: (() => props.theme.type === 'classic' ? <IGN_Logo_Color/> : <IGN_Logo_White/>)(),
-}))`
-    height: 100%;
-    svg {
-        height: inherit;
-        width: fit-content;
-    }
-`;
-
-
-export const Date_Logo = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    user-select: none;
-    justify-content: center;
-    height: 50px;
-    padding: 8px 0;
-
-    h1 {
-        height: inherit;
-        display: none; // flex for web
-        flex-direction : column;
-        font-size: 22px;
-        line-height: 22px;
-        justify-content: space-evenly;
-        margin-left: 15px;
-        white-space: nowrap;
-    }
-
-    @media ${breakPoints.laptop} {
-        h1 {
-            display: flex;
-        }
-    }
-`;
-
 export const ContentSelection = styled.div`
     display: flex;
     flex-direction: row;
@@ -136,6 +143,11 @@ export const ContentSelection = styled.div`
                 pointer-events: none;
             }
         }
+    }
+
+    a,
+    h1 {
+        color: ${props => props.theme.quaternary};
     }
     
     @media ${breakPoints.tablet} {
@@ -170,7 +182,6 @@ export const SelectionList = styled(ContentSelection)`
         padding: 0 10px;
         a {
             text-decoration: none;
-            color: black;
             font-size: 20px;
         }
     }
@@ -193,14 +204,16 @@ export const SelectionList_More = styled.button`
     position: relative;
     overflow: hidden;
     padding: 0 5px;
+    font-size: 20px;
 
     h1 {
         font-weight: 400;
-        font-size: 20px;
+        font-size: 1em;
     }
     svg {
         width: 10px;
         margin-left: 5px;
+        fill: ${props => props.theme.quaternary};
     }
     &:hover svg {
         transform: rotate(180deg);
@@ -212,24 +225,28 @@ export const SelectionList_More = styled.button`
         top: 100%;
         display: flex;
         flex-direction: column;
-        background-color: ${props => props.theme.primary};
-    }
-    div > a {
-        text-decoration: none;
-        color: black;
-        font-size: 18px;
-        padding: 5px 10px;
-    }
-    div > a:hover {
-        background-color: ${props => props.theme.quaternary};
-    }
-    div > a:focus {
-        outline: none;
+        background-color: ${props => props.theme.secondary};
+        width: 150px;
+
+        a {
+            text-decoration: none;
+            color: ${props => props.theme.quaternary};
+            font-size: 0.9em;
+            line-height: 1.5em;
+            border-left: 5px solid ${props => props.theme.primary};
+            padding:5px 0;
+        }
+        a:hover {
+            backdrop-filter: invert(40%);
+        }
+        a:focus {
+            outline: none;
+        }
     }
 
     &:hover {
         overflow: visible;
-        background-color: ${props => props.theme.primary};
+        background-color: ${props => props.theme.tertiary};
     }
 
     @media ${breakPoints.laptop} {
@@ -242,7 +259,7 @@ export const ThemeSelection = styled.button`
     flex: 0 0 65px;
     height: 32px;
     border-radius: 20px;
-    border: 2px solid black;
+    border: 2.5px solid ${props => props.theme.quaternary};
     display: none;  // flex for web
     background: transparent;
     align-items: center;

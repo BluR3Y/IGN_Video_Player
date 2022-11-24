@@ -30,10 +30,11 @@ export const StyledSearchBar = styled.form`
 
             svg {
                 width: 20px;
+                fill: ${props => props.theme.quaternary};
             }
         }
         button:hover {
-            background-color: ${props => props.theme.quaternary};
+            background-color: ${props => props.theme.primary};
         }
 
         input {

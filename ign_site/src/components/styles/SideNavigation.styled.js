@@ -1,5 +1,7 @@
 import styled, { css } from "styled-components";
-import {breakPoints} from './breakPoints'
+import {breakPoints} from './breakPoints';
+
+import { Date_Logo, StyledLogo } from './Navigation.styled';
 
 import Menu_Bars from '../../assets/icons/menu_bars';
 import Caret_Down from "../../assets/icons/caret_down";
@@ -17,17 +19,18 @@ export const StyledSideNavigation = styled.div`
     
     .navMain {
         height: inherit;
-        /* padding: 0 30px; */
-        width: 300px;
+        width: calc(100% - 60px);
         position: absolute;
         z-index: 1;
-        left: ${props => props.open ? '0' : '-300px'};
+        left: ${props => props.open ? '0' : 'calc(-100% + 60px)'};
         pointer-events: all;
         transition: left 0.2s ease;
         background-color: ${props => props.theme.secondary};
-        /* display: flex;
-        flex-direction: column;
-        align-items: center; */
+
+        @media (min-width: 350px) {
+            width: 65vw;
+            left: ${props => props.open ? '0' : '-65vw'};
+        }
     }
 
     .collapseBtn {
@@ -80,18 +83,31 @@ export const ContentList = styled.div`
 `;
 
 export const NavContent = styled.div`
-    width: inherit;
+    width: 100%;
     height: inherit;
     position: relative;
     overflow: hidden;
-
+    
     .mainPage {
         left: -100%;
 
-        ${ContentList} {
-            margin-top: 60px;
+        ${Date_Logo} {
+            align-self: flex-start;
+            margin: 15px 0 0 0;
+            height: 40px;
+
+            @media (max-width: 560px ){
+                svg {
+                    display: none;
+                }
+            }
         }
-        
+
+        @media (min-height: 550px) {
+            ${ContentList} {
+                margin-top: 60px;
+            }
+        }
     }
 
     .${props => props.openPage} {
@@ -177,21 +193,20 @@ export const StyledProfileImg = styled.a.attrs(() => ({
 `;
 
 export const ThemeToggle = styled.div`
-    /* width: 220px; */
     width: 100%;
-    height: 42px;
     backdrop-filter: brightness(70%);
     border-radius: 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex: 0 0 50px;
 
     div {
-        width: 46%;
+        width: 50%;
         height: 90%;
         border-radius: 8px;
         position: absolute;
-        left: ${props => props.theme.type === 'classic' ? '1%' : '53%'};
+        left: ${props => props.theme.type === 'classic' ? '3px' : 'calc(50% - 3px)'};
         top: 50%;
         transform: translate(0,-50%);
         background-color: ${props => props.theme.secondary};
@@ -224,7 +239,7 @@ export const ThemeToggle = styled.div`
 
 export const ContentLink = styled.a.attrs((props) => ({
     target: '_blank',
-    children: (props.href ? props.children : ([props.children,<Caret_Down key={1}/>]))
+    children: (props.href ? props.children : ([...props.children,<Caret_Down key={props.children.length + 1}/>]))
 }))`
     width: inherit;
     min-height: 36px;
