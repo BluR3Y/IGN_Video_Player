@@ -9,8 +9,10 @@ import {
     NavContent,
     ContentPage,
     ReturnMainPage, 
-    ContentLink
+    ContentLink,
 } from './styles/SideNavigation.styled';
+
+import { Date_Logo, StyledLogo } from './styles/Navigation.styled';
 
 import Sun from '../assets/icons/sun';
 import Moon from '../assets/icons/moon';
@@ -27,6 +29,7 @@ export default class SideNavigation extends React.Component {
         this.state = {
             openSideNav: false,
             openPage: 'mainPage',
+            currentDate: ['Monday','December 15']
         }
     }
 
@@ -38,9 +41,16 @@ export default class SideNavigation extends React.Component {
                 <StyledHamburgerButton onClick={() => this.setState(prevState => ({ openSideNav: !prevState.openSideNav }))} />
                 <NavContent openPage={this.state.openPage}>
                     <ContentPage className="mainPage" activePage={this.state.openPage}>
+                        <Date_Logo>
+                            <StyledLogo/>
+                            <h1>
+                                <span>{this.state.currentDate[0]}</span>
+                                <span>{this.state.currentDate[1]}</span>
+                            </h1>
+                        </Date_Logo>
                         <StyledProfile>
                             <StyledProfileImg/>
-                            <h1>Rey Hector Flores Hernandez</h1>
+                            <h1>John Doe</h1>
                         </StyledProfile>
                         <ThemeToggle>
                             <div/>
