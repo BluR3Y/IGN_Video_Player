@@ -72,6 +72,18 @@ export const ContentPage = styled.div`
     align-items: center;
     transition: left 0.4s ease;
     padding: 0 30px;
+    user-select: none;
+
+    .pageTitle {
+        font-weight: 700;
+        font-size: 40px;
+        line-height: 40px;
+        color: ${props => props.theme.quaternary};
+        text-align: left;
+        width: inherit;
+        margin: 30px 0 10px 0;
+        border-bottom: 3px solid ${props => props.theme.tertiary};
+    }
 `;
 
 export const ContentList = styled.div`
@@ -118,9 +130,6 @@ export const NavContent = styled.div`
         border-left: 3px solid ${props => props.theme.primary};
         padding-left: 3px;
         background-color: rgba(0,0,0,0.2);
-    }
-    ${ContentPage}:not(:first-child) > ${ContentList} {
-        padding-top: 50px;
     }
 `;
 
@@ -281,21 +290,24 @@ export const ReturnMainPage = styled.button.attrs(() => ({
         <h1>Return</h1>    
     </>)
 }))`
-    width: 90px;
-    font-size: 20px;
+    font-size: 22px;
     margin: 15px 0;
     display: flex;
     flex-direction: row;
     align-items: center;
+    align-self: flex-start;
+    
 
     h1 {
         font-size: 1em;
         font-weight: 500;
-        margin-left: auto;
+        margin-left: 10px;
+        color: ${props => props.theme.quaternary};
     }
     
     svg {
         width: 0.9em;
         transform: rotate(90deg);
+        fill: ${props => props.theme.quaternary};
     }
 `;

@@ -3,6 +3,8 @@ import { breakPoints, deviceSizes } from './breakPoints';
 import { StyledSearchBar } from "./SearchBar.styled";
 
 import { IGN_Logo_White, IGN_Logo_Color } from '../../assets/icons/ign_logo';
+import Moon from "../../assets/icons/moon";
+import Sun from "../../assets/icons/sun";
 
 export const StyledLogo = styled.a.attrs((props) => ({
     href: 'https://www.ign.com/',
@@ -205,6 +207,7 @@ export const SelectionList_More = styled.button`
     overflow: hidden;
     padding: 0 5px;
     font-size: 20px;
+    margin-right: 10px;
 
     h1 {
         font-weight: 400;
@@ -255,7 +258,13 @@ export const SelectionList_More = styled.button`
     
 `;
 
-export const ThemeSelection = styled.button`
+export const ThemeSelection = styled.button.attrs((props) => ({
+    children: (() => {
+        var ActiveEl = props.theme.type === 'classic' ? <Sun/> : <Moon/>;
+        return(<div>{ActiveEl}</div>);
+    })(),
+    tabIndex: '0'
+}))`
     flex: 0 0 65px;
     height: 32px;
     border-radius: 20px;
@@ -286,7 +295,7 @@ export const ThemeSelection = styled.button`
         transform: translateY(-50%);
         transition: left 0.10s linear;
 
-        ${props => props.activeTheme == 'dark' && css`
+        ${props => props.theme.type === 'dark' && css`
             left: 33px;
         `}
     }

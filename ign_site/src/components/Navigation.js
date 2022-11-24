@@ -13,9 +13,6 @@ import {
 } from "./styles/Navigation.styled";
 
 import Caret_Down from '../assets/icons/caret_down';
-import Sun from '../assets/icons/sun';
-import Moon from '../assets/icons/moon';
-import Menu_Bars from '../assets/icons/menu_bars';
 
 import ProfileImg from '../assets/images/profileImg.jfif';
 import SearchBar from "./SearchBar";
@@ -49,7 +46,6 @@ export default class Navigation extends React.Component {
         var date = new Date();
         var weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        console.log('marker')
         var currWeekday = weekDays[date.getDay()];
         var currDate = months[date.getMonth()] + ' ' + date.getDate();
         this.setState({ currentDate: [currWeekday, currDate] });
@@ -143,19 +139,21 @@ export default class Navigation extends React.Component {
     }
 
     render() {
+        const { currentDate, selectionListRef, hiddenContentItems, searchBarRef, additionalSelectionItems } = this.state;
+        const { submitSearch, searchAutoComplete } = this;
         return(<Nav_Container>
             <div className="navMain">
                 <Date_Logo>
                     <StyledLogo/>
-                    {this.state.currentDate && (
+                    {currentDate && (
                         <h1>
-                            <span>{this.state.currentDate[0]}</span>
-                            <span>{this.state.currentDate[1]}</span>
+                            <span>{currentDate[0]}</span>
+                            <span>{currentDate[1]}</span>
                         </h1>
                     )}
                 </Date_Logo>
                 <ContentSelection>
-                    <SelectionList ref={this.state.selectionListRef}>
+                    <SelectionList ref={selectionListRef}>
                         <div><a href='https://www.ign.com/news' target='_blank'>News</a></div>
                         <div><a href='https://www.ign.com/videos' target='_blank'>Videos</a></div>
                         <div><a href='https://www.ign.com/reviews' target='_blank'>Reviews</a></div>
@@ -166,7 +164,7 @@ export default class Navigation extends React.Component {
                         <h1>More</h1>
                         <Caret_Down/>
                         <div>
-                            {this.state.hiddenContentItems.map((item, index) => (
+                            {hiddenContentItems.map((item, index) => (
                                 <a href={item.link} key={index} tabIndex='-1'>{item.title}</a>
                             ))}
                             <a href="https://www.ign.com/wikis/ign-community-central/How_to_Follow_IGN" tabIndex='-1'>IGN on social</a>
@@ -182,15 +180,11 @@ export default class Navigation extends React.Component {
                         </div>
                     </SelectionList_More>
                     <SearchBar
-                        ref={this.state.searchBarRef}
-                        onSubmit={this.submitSearch}
-                        searchAutoComplete={this.searchAutoComplete}
+                        ref={searchBarRef}
+                        onSubmit={submitSearch}
+                        searchAutoComplete={searchAutoComplete}
                     />
-                    <ThemeSelection activeTheme={this.props.activeTheme} onClick={this.props.toggleTheme} tabIndex='0'>
-                        <div>
-                            {this.props.activeTheme == 'classic' ? <Sun/> : <Moon/>}
-                        </div>
-                    </ThemeSelection>
+                    <ThemeSelection onClick={this.props.toggleTheme}/>
                     <Profile>
                         <img src={ProfileImg}/>
                         <h1>12</h1>
@@ -198,7 +192,7 @@ export default class Navigation extends React.Component {
                 </ContentSelection>
             </div>
             <div className="navSub">
-                {this.state.additionalSelectionItems ? (this.state.additionalSelectionItems.map(item => (
+                {additionalSelectionItems ? (additionalSelectionItems.map(item => (
                     <a href={`https://www.google.com/search?q=${encodeURIComponent(item.name)} site:ign.com`} target='_target' key={item.id}>{item.name}</a>
                 ))) : [...Array(8)].map((item,index) => <StyledLoadingAdditionalContent key={index} />)}
             </div>

@@ -4,6 +4,7 @@ import GlobalStyles from './styles/GlobalStyles';
 import Navigation from "./Navigation";
 import { ThemeProvider } from "styled-components";
 import SideNavigation from "./SideNavigation";
+import Playlist from "./Playlist";
 
 export default class App extends React.Component {
     constructor(props) {
@@ -26,20 +27,35 @@ export default class App extends React.Component {
                 }
             },
             activeTheme: 'dark',
+            isMobile: false,
         }
+    }
+
+    componentDidMount() {
+        this.updateDevice();
+        window.addEventListener('resize', this.updateDevice);
+    }
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.updateDevice);
     }
 
     toggleTheme = () => {
         this.setState({ activeTheme: (this.state.activeTheme == 'classic' ? 'dark' : 'classic') });
     }
 
+    updateDevice = () => {
+        this.setState({ isMobile: window.innerWidth < 769 });
+    }
+
     render() {
-        return(
-            <ThemeProvider theme={this.state.siteThemes[this.state.activeTheme]}>
-                <GlobalStyles/>
-                <Navigation activeTheme={this.state.activeTheme} toggleTheme={this.toggleTheme}/>
-                <SideNavigation activeTheme={this.state.activeTheme} toggleTheme={this.toggleTheme} />
-            </ThemeProvider>
-        );
+        const { siteThemes, activeTheme, isMobile } = this.state;
+        const { toggleTheme } = this;
+
+        return(<ThemeProvider theme={siteThemes[activeTheme]}>
+            <GlobalStyles/>
+            <Navigation toggleTheme={toggleTheme} />
+            {isMobile && (<SideNavigation toggleTheme={toggleTheme} />)}
+            <Playlist/>
+        </ThemeProvider>);
     }
 }
