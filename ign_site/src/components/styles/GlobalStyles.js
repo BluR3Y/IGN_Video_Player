@@ -65,6 +65,11 @@ const GlobalStyles = createGlobalStyle`
         background-color: ${props => props.theme.type === 'classic' ? '#f6f8f7' : '#202634'};
     }
 
+    #root {
+        display: flex;
+        flex-direction: column;
+    }
+
     svg {
         display: block;
     }

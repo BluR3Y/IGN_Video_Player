@@ -16,14 +16,16 @@ export default class App extends React.Component {
                     primary: '#bf1313',
                     secondary: '#ffffff',
                     tertiary: '#bbc4c4',
-                    quaternary: '#41495a'
+                    quaternary: '#41495a',
+                    textColor: '#181c25'
                 },
                 dark: {
                     type: 'dark',
                     primary: '#bf1313',
                     secondary: '#41495a',
                     tertiary: '#bbc4c4',
-                    quaternary: '#ffffff'
+                    quaternary: '#ffffff',
+                    textColor: '#f6f8f7'
                 }
             },
             activeTheme: 'dark',

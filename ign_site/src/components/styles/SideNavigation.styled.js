@@ -9,7 +9,7 @@ import Caret_Down from "../../assets/icons/caret_down";
 import ProfileImg from '../../assets/images/profileImg.jpeg';
 
 export const StyledSideNavigation = styled.div`
-    position: fixed;
+    position: absolute; // swapped with 'fixed' bc hid behind Playlist Content
     width: 100vw;
     height: 100vh;
     left: 0;
