@@ -2,7 +2,11 @@ import styled, { css } from "styled-components";
 
 import Share from '../../assets/icons/share';
 import Play from '../../assets/icons/play';
+import Pause from '../../assets/icons/pause';
 import Play_Sharp from '../../assets/icons/play_sharp';
+import Mute from '../../assets/icons/mute';
+import Volume_High from '../../assets/icons/volume_high';
+import Volume_Low from '../../assets/icons/volume_low';
 
 export const StyledVideoPlayer = styled.div`
     width: 100%;
@@ -12,11 +16,82 @@ export const StyledVideoPlayer = styled.div`
     overflow: hidden;
     border-radius: 10px;
     user-select: none;
+    aspect-ratio: ${props => props.aspectRatio};
 
     video {
         width: 100%;
         height: auto;
         display: block;
+        visibility: ${props => props.isLoaded ? 'visible' : 'hidden'};
+    }
+
+    ${props => props.idle && css`
+        *:not(video) {
+            display: none;
+        }
+    `}
+`;
+
+export const StyledVideoPlayerLoading = styled.div.attrs(() => ({
+    children: (<>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </>)
+}))`
+    & {
+        --loader-height: calc(100px / 7);
+        display: flex;
+        width: fit-content;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+    }
+    &::before {
+        content: '';
+        position: absolute;
+    }
+    &::before,
+    & > span {
+        display: block;
+        width: var(--loader-height);
+        height: var(--loader-height);
+        border-radius: 50%;
+        background: #5e5954;
+        
+        animation-name: to-right;
+        animation-duration: 500ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear;
+    }
+    & > span:nth-child(even) {
+        visibility: hidden;
+    }
+    & > span:first-child {
+        animation-name: scale-up;
+    }
+    & > span:last-child {
+        animation-name: scale-up;
+        animation-direction: reverse;
+    }
+
+    @keyframes to-right {
+        to {
+            transform: translateX(200%);
+        }
+    }
+    @keyframes scale-up {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
     }
 `;
 
@@ -138,10 +213,26 @@ export const Controls = styled.div`
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 70px 0 10px 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 20px;
+    height: 150px;
     visibility: hidden;
     transition: opacity 0.10s linear;
     background-image: linear-gradient(to top, black 0%, transparent 100%);
+
+    * {
+        pointer-events: auto;
+    }
+
+    .progressBar {
+        margin: 10px 0;
+    }
+    .progressBar:hover {
+        height: 5px;
+    }
 
     ${props => props.isActive && css`
         ${StyledVideoPlayer}:hover & {
@@ -223,11 +314,11 @@ export const AutoPlayBtn = styled.button.attrs((props) => ({
             color: #fff;
         }
     }
-    visibility: visible;
+
     ${props => props.isActive ? css`    //controls
         flex-direction: row;
         top: 0;
-        left: ${props => props.isPlaying ? '-240px' : '0'};
+        left: ${props => props.isPlaying ? '-240px' : '20px'};
         transition: left 0.10s linear;
         background-color: #202634;
     ` : css`    // thumbnail
@@ -235,5 +326,169 @@ export const AutoPlayBtn = styled.button.attrs((props) => ({
         bottom: 20px;
         flex-direction: row-reverse;
         background-color: transparent;
+        visibility: visible;
     `}
+`;
+
+export const RangeSlider = styled.input.attrs(() => ({
+    type: 'range',
+}))`
+    -webkit-appearance: none;
+    background-color: #ffffff;
+    border-radius: 20px;
+    height: 3px;
+    width: 100%;
+    margin: 0;
+    display: block;
+    cursor: pointer;
+
+    &::-webkit-slider-runnable-track {
+        height: 10px;
+    }
+    &::-webkit-slider-thumb {
+        width: 15px;
+        -webkit-appearance: none;
+        height: 15px;
+        cursor: pointer;
+        background-image: radial-gradient(#fe0303 30%, #ffffff 20%);
+        border-radius: 50%;
+        margin-top: -2px;
+    }
+`;
+
+export const MainControls = styled.div`
+    display: flex;
+    flex-direction: row;
+    height: 40px;
+    justify-content: space-between;
+    margin: -3px 0 10px;
+
+    .leftControls {
+        height: inherit;
+        width: 300px;
+        display: flex;
+        flex-direction: row;
+
+        .volumeControl {
+            height: inherit;
+            width: 120px;
+            display: flex;
+            flex-direction: row;
+            align-items:center;
+        }
+
+        h1 {
+            font-family: Lato;
+            font-weight: 500;
+            font-size: 18px;
+            color: #fff;
+            margin-left: 20px;
+            height: fit-content;
+            align-self: center;
+        }
+    }
+
+    .rightControls {
+        height: inherit;
+        width: 300px;
+        display: flex;
+        flex-direction: row;
+    }
+`;
+
+export const TogglePlayPause = styled.div.attrs((props) => ({
+    children: (<>
+        <button onClick={props.toggle}>{props.isPlaying ? <Pause/> : <Play/>}</button>
+    </>)
+}))`
+    height: inherit;
+    width: 40px;
+    margin: 0;
+    button {
+        height: inherit;
+        svg {
+            height: 27px;
+            fill: #fff;
+         }
+    }
+`;
+export const ToggleVolume = styled(TogglePlayPause).attrs((props) => ({
+    children: (<>
+        <button onClick={props.toggle}>{props.volume > 0 ? (props.volume > 0.5 ? <Volume_High/> : <Volume_Low/>) : <Mute/>}</button>
+    </>)
+}))`
+    margin-right: 5px;
+    width: 50px;
+`;
+
+export const ResolutionInput = styled.label.attrs((props) => ({
+    children: (<>
+        {`${props.itemProps.height}p`}
+        <input type='radio' name='resolutionOption' value={props.value} defaultChecked={props.checked}/>
+    </>),
+}))`
+    width: inherit;
+    height: 30px;
+    cursor: pointer;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+
+    input[type="radio"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.1em;
+        height: 1.1em;
+        border-radius: 50%;
+        background-color: #5e5954;
+        margin-left: 5px;
+        display: grid;
+        place-content: center;
+    }
+    input[type="radio"]:hover {
+        background-color: #fff;
+    }
+    input[type="radio"]::before {
+        content: "";
+        width: 0.5em;
+        height: 0.5em;
+        border-radius: 50%;
+        transform: scale(0);
+        background-color: red;
+    }
+    input[type="radio"]:checked::before {
+        transform: scale(1);
+    }
+    input[type="radio"]:checked {
+        background-color: #fff;
+    }
+`;
+
+export const ResolutionForm = styled.form`
+    position:absolute;
+    width: 100px;
+    background-color: #161618;
+    left: 50%;
+    bottom: 115%;
+    transform: translateX(-50%);
+    display:flex;
+    flex-direction: column;
+`;
+
+export const ResolutionSelection = styled.div`
+    height: inherit;
+    position:relative;
+    cursor: pointer;
+    overflow: ${props => props.open ? 'visible' : 'hidden'};
+    
+    button {
+        height: inherit;
+        svg {
+            height: 100%;
+            fill: #fff;
+        }
+    }
 `;

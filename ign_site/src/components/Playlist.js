@@ -38,7 +38,7 @@ export default class Playlist extends React.Component {
             dataType: 'JSONP',
         }).then(res => res.data);
         console.log(ignVideos)
-        this.setState({ videos: ignVideos, activeVideo: 3 });
+        this.setState({ videos: ignVideos, activeVideo: 1 });
     }
 
     fetchArticles = async (startIndex = 0, count = 10) => {

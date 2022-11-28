@@ -1,6 +1,24 @@
 import React from "react";
 
-import { AutoPlayBtn, Controls, Header, ShareVideoBtn, StyledVideoPlayer, Thumbnail } from "./styles/VideoPlayer.styled";
+import { 
+    AutoPlayBtn, 
+    Controls, 
+    Header, 
+    MainControls, 
+    RangeSlider, 
+    ResolutionForm, 
+    ResolutionInput, 
+    ResolutionSelection, 
+    ShareVideoBtn, 
+    StyledVideoPlayer, 
+    StyledVideoPlayerLoading, 
+    Thumbnail, 
+    TogglePlayPause, 
+    ToggleVolume 
+} from "./styles/VideoPlayer.styled";
+
+import Standard_Definition from '../assets/icons/standard_definition';
+import High_Definition from '../assets/icons/high_definition';
 
 export default class VideoPlayer extends React.Component {
     constructor(props) {
@@ -8,12 +26,17 @@ export default class VideoPlayer extends React.Component {
         this.state = {
             videoInfo: this.props.videoInfo,
             activeThumbnail: null,
-            activeVideo: (props.videoInfo['assets'].length ? props.videoInfo['assets'][0] : null),
+            activeVideoIndex: 0,
             isActive: false,
             isPlaying: false,
+            isMuted: true,
             autoPlay: false,
             idleTimer: null,
             isIdle: false,
+            volume: 1,
+            isLoaded: false,
+            videoElapsedTime: 0,
+            resolutionMenuOpen: false,
             videoPlayer: React.createRef(),
             progressBar: React.createRef(),
             volumeSlider: React.createRef(),
@@ -23,12 +46,22 @@ export default class VideoPlayer extends React.Component {
 
     componentDidMount() {
         this.setActiveThumbnail();
-        
+        const { isActive, autoPlay } = this.state;
+        if(!isActive && autoPlay)
+            this.startVideo();
+
         window.addEventListener('resize', this.setActiveThumbnail);
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.setActiveThumbnail);
+    }
+
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+
+        if(prevState.activeVideoIndex !== this.state.activeVideoIndex)
+            this.handleActiveVideoIndexChange(prevState.videoElapsedTime, prevState.isPlaying);
     }
 
     setActiveThumbnail = () => {
@@ -45,43 +78,92 @@ export default class VideoPlayer extends React.Component {
     }
 
     startVideo = () => {
-        this.setState({ isActive: true });
-        this.playPauseMedia();
+        const { media, videoPlayer } = this.state;
+        var playMedia = media.current.play();
+        if(playMedia !== undefined) {
+            playMedia.then(_ => {
+                videoPlayer.current.addEventListener('mousemove', this.handleIdle);
+                this.setState({ isActive:true });
+            })
+            .catch(err => {
+                console.error('Error While Starting Video: ', err);
+            })
+        }
     }
 
     playPauseMedia = () => {
         const { media } = this.state;
 
-        if(media.current.paused)
-            media.current.play();
-        else
-            media.current.pause();
-        
-        this.setState(prevState => ({ isPlaying: !prevState.isPlaying }));
+        if(media.current.paused) {
+            var playMedia = media.current.play();
+            if(playMedia !== undefined) {
+                playMedia
+                .catch(err => {
+                    console.error('Error While Playing Video: ', err);
+                })
+            }
+        }else{
+            media.current.pause()
+        }
     }
 
     toggleVolume = () => {
-
+        this.setState(prevState => ({ isMuted: !prevState.isMuted }));
     }
 
-    updateVolume = () => {
-
+    setVolume = (event) => {
+        const { media } = this.state;
+        media.current.volume = event.currentTarget.value;
     }
 
-    updateElapsedTime = () => {
-
+    handleVolumeChange = (event) => {
+        const { volume, muted } = event.currentTarget;
+        this.setState({ volume, isMuted: muted });
     }
 
-    setVideoProgress = () => {
+    updateElapsedTime = (event) => {
+        const videoElapsedTime = event.currentTarget.currentTime;
+        this.setState({ videoElapsedTime });
+    }
 
+    setVideoProgress = (event) => {
+        const { media } = this.state;
+        media.current.currentTime = event.currentTarget.value;
+    }
+
+    setResolution = (event) => {
+        var activeVideoIndex = event.target.value;
+        this.setState({ activeVideoIndex, resolutionMenuOpen: false, isLoaded: false });
+    }
+
+    handleActiveVideoIndexChange = (prevElapsedTime, prevIsPlaying) => {
+        const { media } = this.state;
+        media.current.load();
+        media.current.currentTime = prevElapsedTime;
+        if(prevIsPlaying)
+            media.current.play();
+    }
+
+    handleLoadedVideo = () => {
+        const { videoElapsedTime } = this.state;
+        console.log('new: ',videoElapsedTime)
+
+        this.setState({ isLoaded: true });
     }
 
     copyToClipBoard = () => {
 
     }
 
-    handleIdle = () => {
+    handleIdle = () => {    // buggy
+        // var { idleTimer, isIdle } = this.state;
 
+        // clearTimeout(idleTimer);
+        // isIdle = false;
+        // idleTimer = setTimeout(() => {
+        //     this.setState({ isIdle: true });
+        // }, 5000);
+        // this.setState({ idleTimer, isIdle });
     }
 
     HH_MM_SS = seconds => {
@@ -92,12 +174,16 @@ export default class VideoPlayer extends React.Component {
     }
 
     render() {
-        const { videoInfo, activeThumbnail, activeVideo, autoPlay, media, videoPlayer, volumeSlider, isActive, isPlaying } = this.state;
-        const { startVideo, playPauseMedia, toggleVolume, updateVolume, updateElapsedTime, setVideoProgress, copyToClipBoard, handleIdle} = this;
-
-        return(<StyledVideoPlayer ref={videoPlayer}>
+        const { videoInfo, activeThumbnail, activeVideoIndex, autoPlay, media, videoPlayer, volumeSlider, isActive, isPlaying, videoElapsedTime, isIdle, volume, isMuted, resolutionMenuOpen, isLoaded } = this.state;
+        const { startVideo, playPauseMedia, setVolume, updateElapsedTime, setVideoProgress, copyToClipBoard, toggleVolume, handleLoadedVideo, handleVolumeChange, HH_MM_SS, setResolution} = this;
+        return(<StyledVideoPlayer 
+            ref={videoPlayer} 
+            idle={isIdle}   
+            isLoaded={isLoaded}
+            aspectRatio={videoInfo['assets'][activeVideoIndex].width / videoInfo['assets'][activeVideoIndex].height}
+        >
             <Header isActive={isActive} >
-                <a href={activeVideo.url}>{videoInfo.metadata.title}</a>
+                <a href={videoInfo['assets'][activeVideoIndex].url}>{videoInfo.metadata.title}</a>
                 <ShareVideoBtn onClick={copyToClipBoard} />
             </Header>
             <Thumbnail 
@@ -106,10 +192,20 @@ export default class VideoPlayer extends React.Component {
                 onClick={startVideo}
                 isActive={isActive}
             />
-            <video ref={media} onClick={playPauseMedia}>
+            {!isLoaded && <StyledVideoPlayerLoading/>}
+            <video 
+                ref={media} 
+                onClick={playPauseMedia}
+                onTimeUpdate={updateElapsedTime} 
+                onVolumeChange={handleVolumeChange}
+                muted={isMuted}
+                onLoadedData={handleLoadedVideo}
+                onPlay={() => this.setState({ isPlaying: true })}
+                onPause={() => this.setState({ isPlaying: false })}
+            >
                 <source
-                    src={activeVideo.url}
-                    type={`video/${activeVideo.url.split('.').pop()}`}
+                    src={videoInfo['assets'][activeVideoIndex].url}
+                    type={`video/${videoInfo['assets'][activeVideoIndex].url.split('.').pop()}`}
                 />
             </video>
             <Controls isActive={isActive}>
@@ -119,7 +215,45 @@ export default class VideoPlayer extends React.Component {
                     autoPlay={autoPlay} 
                     onClick={() => this.setState(prevState => ({ autoPlay: !prevState.autoPlay }))}
                 />
-
+                <RangeSlider
+                    min='0'
+                    max={videoInfo.metadata.duration}
+                    step={videoInfo.metadata.duration / 1000}
+                    value={videoElapsedTime}
+                    onInput={setVideoProgress}
+                    onMouseDown={() => media.current.pause()}
+                    onMouseUp={() => media.current.play()}
+                    className='progressBar'
+                />
+                <MainControls>
+                    <div className="leftControls">
+                        <TogglePlayPause isPlaying={isPlaying} toggle={playPauseMedia}/>
+                        <div className="volumeControl">
+                            <ToggleVolume volume={isMuted ? '0' : volume} toggle={toggleVolume} />
+                            <RangeSlider
+                                min='0'
+                                max='1'
+                                step='0.01'
+                                value={!isMuted ? volume : '0'}
+                                onInput={setVolume}
+                                ref={volumeSlider}
+                            />
+                        </div>
+                        <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoInfo.metadata.duration)}`}</h1>
+                    </div>
+                    <div className="rightControls">
+                        <ResolutionSelection open={resolutionMenuOpen}>
+                            <button
+                                onClick={() => this.setState(prevState => ({ resolutionMenuOpen: !prevState.resolutionMenuOpen }))}
+                            >{videoInfo['assets'][activeVideoIndex].height > 540 ? <High_Definition/> : <Standard_Definition/>}</button>
+                            <ResolutionForm onChange={setResolution}>
+                                {videoInfo['assets'].map((item, index) => (<ResolutionInput 
+                                    itemProps={item} key={index} value={index} checked={activeVideoIndex === index} 
+                                />))}
+                            </ResolutionForm>
+                        </ResolutionSelection>
+                    </div>
+                </MainControls>
             </Controls>
         </StyledVideoPlayer>);
     }
