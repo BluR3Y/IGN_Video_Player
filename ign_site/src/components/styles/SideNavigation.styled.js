@@ -9,13 +9,14 @@ import Caret_Down from "../../assets/icons/caret_down";
 import ProfileImg from '../../assets/images/profileImg.jpeg';
 
 export const StyledSideNavigation = styled.div`
-    position: absolute; // swapped with 'fixed' bc hid behind Playlist Content
+    position: fixed; // swapped with 'fixed' bc hid behind Playlist Content
     width: 100vw;
     height: 100vh;
     left: 0;
     top: 0;
     pointer-events: none;
     -webkit-tap-highlight-color: transparent;
+    z-index: 3;
     
     .navMain {
         height: inherit;

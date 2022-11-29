@@ -1,6 +1,7 @@
 import React from "react";
 
 import { StyledQueueVideo, StyledVideoQueue } from "./styles/VideoQueue.styled";
+import PreviewPlayer from './PreviewPlayer';
 
 class QueueVideo extends React.Component {
     constructor(props) {
@@ -9,9 +10,22 @@ class QueueVideo extends React.Component {
             loadedVideo: false,
         }
     }
-    render() {
-        return(<StyledQueueVideo>
 
+    convertTimestamp = (timestamp) => {
+        var months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+        var date = new Date(timestamp);
+        return(`${months[date.getMonth()]} ${date.getDate()} ${date.getFullYear()}`);
+    }
+
+    render() {
+        const { videoInfo } = this.props;
+        const { convertTimestamp } = this;
+        return(<StyledQueueVideo>
+            <PreviewPlayer videoInfo={videoInfo} />
+            <div className="videoInfo">
+                <h1>{videoInfo['metadata'].title}</h1>
+                <h2>Published: <span>{convertTimestamp(videoInfo['metadata'].publishDate)}</span></h2>
+            </div>
         </StyledQueueVideo>);
     }
 }

@@ -5,6 +5,7 @@ import {
     Controls, 
     Header, 
     MainControls, 
+    MiniPlayerBtn, 
     RangeSlider, 
     ResolutionForm, 
     ResolutionInput, 
@@ -12,7 +13,9 @@ import {
     ShareVideoBtn, 
     StyledVideoPlayer, 
     StyledVideoPlayerLoading, 
+    TheaterModeBtn, 
     Thumbnail, 
+    ToggleFullScreen, 
     TogglePlayPause, 
     ToggleVolume 
 } from "./styles/VideoPlayer.styled";
@@ -37,6 +40,9 @@ export default class VideoPlayer extends React.Component {
             isLoaded: false,
             videoElapsedTime: 0,
             resolutionMenuOpen: false,
+            miniPlayerMode: false,
+            theaterMode: false,
+            fullscreenMode: false,
             videoPlayer: React.createRef(),
             progressBar: React.createRef(),
             volumeSlider: React.createRef(),
@@ -146,13 +152,25 @@ export default class VideoPlayer extends React.Component {
 
     handleLoadedVideo = () => {
         const { videoElapsedTime } = this.state;
-        console.log('new: ',videoElapsedTime)
 
         this.setState({ isLoaded: true });
     }
 
     copyToClipBoard = () => {
 
+    }
+
+    toggleFullScreen = () => {
+        const { videoPlayer } = this.state;
+        if(document.fullscreenElement) {
+            document.exitFullscreen()
+            .then(() => this.setState({ fullscreenMode:false }))
+            .catch((err) => console.error('Error While Exiting Full Screen: ',err));
+        }else{
+            videoPlayer.current.requestFullscreen()
+            .then(() => this.setState({ fullscreenMode: true }))
+            .catch((err) => console.error('Error While Entering Full Screen: ', err));
+        }
     }
 
     handleIdle = () => {    // buggy
@@ -174,12 +192,45 @@ export default class VideoPlayer extends React.Component {
     }
 
     render() {
-        const { videoInfo, activeThumbnail, activeVideoIndex, autoPlay, media, videoPlayer, volumeSlider, isActive, isPlaying, videoElapsedTime, isIdle, volume, isMuted, resolutionMenuOpen, isLoaded } = this.state;
-        const { startVideo, playPauseMedia, setVolume, updateElapsedTime, setVideoProgress, copyToClipBoard, toggleVolume, handleLoadedVideo, handleVolumeChange, HH_MM_SS, setResolution} = this;
+        const { 
+            videoInfo,
+            activeThumbnail, 
+            activeVideoIndex, 
+            autoPlay, 
+            media, 
+            videoPlayer, 
+            volumeSlider, 
+            isActive, 
+            theaterMode, 
+            isPlaying, 
+            miniPlayerMode, 
+            videoElapsedTime, 
+            isIdle, 
+            volume, 
+            isMuted, 
+            resolutionMenuOpen, 
+            isLoaded,
+            fullscreenMode
+        } = this.state;
+        const { 
+            startVideo, 
+            playPauseMedia, 
+            setVolume, 
+            updateElapsedTime, 
+            setVideoProgress, 
+            copyToClipBoard, 
+            toggleVolume, 
+            handleLoadedVideo, 
+            handleVolumeChange, 
+            HH_MM_SS, 
+            setResolution,
+            toggleFullScreen
+        } = this;
         return(<StyledVideoPlayer 
             ref={videoPlayer} 
             idle={isIdle}   
             isLoaded={isLoaded}
+            miniPlayerMode={miniPlayerMode}
             aspectRatio={videoInfo['assets'][activeVideoIndex].width / videoInfo['assets'][activeVideoIndex].height}
         >
             <Header isActive={isActive} >
@@ -244,6 +295,7 @@ export default class VideoPlayer extends React.Component {
                     <div className="rightControls">
                         <ResolutionSelection open={resolutionMenuOpen}>
                             <button
+                                title={'Video Quality'}
                                 onClick={() => this.setState(prevState => ({ resolutionMenuOpen: !prevState.resolutionMenuOpen }))}
                             >{videoInfo['assets'][activeVideoIndex].height > 540 ? <High_Definition/> : <Standard_Definition/>}</button>
                             <ResolutionForm onChange={setResolution}>
@@ -252,6 +304,9 @@ export default class VideoPlayer extends React.Component {
                                 />))}
                             </ResolutionForm>
                         </ResolutionSelection>
+                        <MiniPlayerBtn onClick={() => this.setState(prevState => ({ miniPlayerMode : !prevState.miniPlayerMode }))} />
+                        <TheaterModeBtn activeMode={theaterMode} onClick={() => this.setState(prevState => ({ theaterMode: !prevState.theaterMode}))}/>
+                        <ToggleFullScreen activeMode={fullscreenMode} onClick={toggleFullScreen} />
                     </div>
                 </MainControls>
             </Controls>

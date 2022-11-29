@@ -5,7 +5,7 @@ import VideoPlayer from "./VideoPlayer";
 import VideoQueue from "./VideoQueue";
 import ArticleList from './ArticleList';
 
-import { StyledPlaylist } from './styles/Playlist.styled';
+import { CommentCount, StyledPlaylist, VideoTags } from './styles/Playlist.styled';
 
 export default class Playlist extends React.Component {
     constructor(props) {
@@ -14,8 +14,15 @@ export default class Playlist extends React.Component {
             articles: null,
             videos: null,
             comments: null,
-            activeVideo: null
+            activeVideoIndex: null,
+            videoDescription: null,
+            videoTimeStamps: null,
         }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if(prevState.activeVideoIndex !== this.state.activeVideoIndex)
+            this.findTimeStamps();
     }
 
     componentDidMount() {
@@ -38,7 +45,7 @@ export default class Playlist extends React.Component {
             dataType: 'JSONP',
         }).then(res => res.data);
         console.log(ignVideos)
-        this.setState({ videos: ignVideos, activeVideo: 1 });
+        this.setState({ videos: ignVideos, activeVideoIndex: 2 });
     }
 
     fetchArticles = async (startIndex = 0, count = 10) => {
@@ -70,24 +77,105 @@ export default class Playlist extends React.Component {
         console.log(ignComments)
     }
 
-    // render() {
-    //     const { videos, articles, comments, activeVideo } = this.state;
-    //     if(!videos)
-    //         return(<></>)
-    //     return(<StyledPlaylist>
-    //         <div className="activeVideo">
-    //             <VideoPlayer videoInfo={videos[activeVideo]} />
-    //             <h1>{videos[activeVideo].metadata.title}</h1>
-    //             <p>{videos[activeVideo].metadata.description}</p>
-    //         </div>
-    //         <VideoQueue videos={videos} />
-    //         <ArticleList/>
-    //     </StyledPlaylist>);
-    // }
+    findTimeStamps = async () => {
+        const { videos, activeVideoIndex } = this.state;
+        const videoInfo = videos[activeVideoIndex];
+        var videoDescription = videoInfo['metadata'].description;
+        var videoTimeStamps = this.getTimeStamps(videoDescription);
+
+        if(videoTimeStamps.length) {
+            videoDescription = videoDescription.substring(0, videoDescription.indexOf(videoTimeStamps[0].timestamp)) + 
+            videoDescription.substring(videoDescription.indexOf(videoTimeStamps[videoTimeStamps.length-1].title)+videoTimeStamps[videoTimeStamps.length-1].title.length);            
+        }
+        this.setState({ videoDescription, videoTimeStamps });
+    }
+
+    getTimeStamps = (str) => {
+        var timeStamps = [];
+        var lastTSIndex = null;
+        var lastTimeStamp = null;
+        for(var i =0; i < str.length-4; i++) {
+            if(!isNaN(parseFloat(str[i]))) {
+                var j = i+1;
+                for(; j < str.length && str[j] !== ' '; j++);
+                var subStr = str.substring(i,j);
+                if(this.isTimeStamp(subStr)) {
+                    if(lastTSIndex) {
+                        var prevTitle = str.substring(lastTSIndex, i);
+                        if(prevTitle[0] === ' ')
+                            prevTitle = prevTitle.substring(1);
+                        if(prevTitle[prevTitle.length-1] === ' ')
+                            prevTitle = prevTitle.substring(0, prevTitle.length-1);
+                        timeStamps.push({ timestamp: lastTimeStamp, title: prevTitle });
+                    }
+
+                    lastTimeStamp = subStr;
+                    lastTSIndex = j;
+                }
+
+                i = i+(j-i+1);
+            }
+        }
+        if(lastTSIndex) {
+            var prevTitle = '';
+            for(var i = lastTSIndex + 1; i < str.length; i++) {
+                if(
+                    prevTitle.length &&
+                    str[i].match(/^[A-Z]*$/) &&
+                    (prevTitle[prevTitle.length-1] !== ' ' && prevTitle[prevTitle.length-1] !== '.')
+                ) {
+                    break;
+                }
+                
+                prevTitle += str[i];
+            }
+            timeStamps.push({ timestamp: lastTimeStamp, title: prevTitle });
+        }
+
+        return timeStamps;
+    }
+
+    isTimeStamp = (str) => {
+        if(str.length < 5 || str.length % 3 !== 2)
+            return false;
+        for(var i = 1; i <= str.length; i++) {
+            if(i % 3 === 0) {
+                if(str[i-1] !== ':')
+                    return false;
+            }else{
+                if(isNaN(str[i-1]))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    convertTimestamp = (timestamp) => {
+        var months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+        var date = new Date(timestamp);
+        return(`${months[date.getMonth()]} ${date.getDate()} ${date.getFullYear()}`);
+    }
+
     render() {
-        const { videos, articles, comments, activeVideo } = this.state;
-        if(!videos)
+        const { videos, articles, comments, activeVideoIndex, videoDescription } = this.state;
+        const { convertTimestamp } = this;
+        if(!activeVideoIndex)
             return(<></>)
-        return(<VideoPlayer videoInfo={videos[activeVideo]} />)
+        return(<StyledPlaylist>
+            <div className="activeVideo">
+                <VideoPlayer videoInfo={videos[activeVideoIndex]} />
+                <div className="videoInfo">
+                    <h1>{videos[activeVideoIndex].metadata.title}</h1>
+                    <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
+                    <CommentCount count={5000} />
+                    <p>{videoDescription}</p>
+                    <VideoTags>
+                        {videos[activeVideoIndex]['tags'].map((item, index) => (<li>{item}</li>))}
+                    </VideoTags>
+                </div>
+            </div>
+            <VideoQueue videos={videos}/>
+            <ArticleList/>
+        </StyledPlaylist>);
     }
 }

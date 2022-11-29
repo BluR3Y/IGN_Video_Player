@@ -1,4 +1,5 @@
 import styled, { css } from "styled-components";
+import {deviceSizes} from './breakPoints';
 
 import Share from '../../assets/icons/share';
 import Play from '../../assets/icons/play';
@@ -7,6 +8,9 @@ import Play_Sharp from '../../assets/icons/play_sharp';
 import Mute from '../../assets/icons/mute';
 import Volume_High from '../../assets/icons/volume_high';
 import Volume_Low from '../../assets/icons/volume_low';
+import Right_Arrow from '../../assets/icons/right_arrow';
+import Expand from '../../assets/icons/expand';
+import Compress from '../../assets/icons/compress';
 
 export const StyledVideoPlayer = styled.div`
     width: 100%;
@@ -17,6 +21,7 @@ export const StyledVideoPlayer = styled.div`
     border-radius: 10px;
     user-select: none;
     aspect-ratio: ${props => props.aspectRatio};
+    display: flex;
 
     video {
         width: 100%;
@@ -29,6 +34,13 @@ export const StyledVideoPlayer = styled.div`
         *:not(video) {
             display: none;
         }
+    `}
+
+    ${props => props.miniPlayerMode && css`
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 50vw;
     `}
 `;
 
@@ -390,16 +402,18 @@ export const MainControls = styled.div`
 
     .rightControls {
         height: inherit;
-        width: 300px;
+        width: 230px;
         display: flex;
         flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
     }
 `;
 
 export const TogglePlayPause = styled.div.attrs((props) => ({
     children: (<>
-        <button onClick={props.toggle}>{props.isPlaying ? <Pause/> : <Play/>}</button>
-    </>)
+        <button title={props.isPlaying ? 'Pause' : 'Play'} onClick={props.toggle}>{props.isPlaying ? <Pause/> : <Play/>}</button>
+    </>),
 }))`
     height: inherit;
     width: 40px;
@@ -414,7 +428,7 @@ export const TogglePlayPause = styled.div.attrs((props) => ({
 `;
 export const ToggleVolume = styled(TogglePlayPause).attrs((props) => ({
     children: (<>
-        <button onClick={props.toggle}>{props.volume > 0 ? (props.volume > 0.5 ? <Volume_High/> : <Volume_Low/>) : <Mute/>}</button>
+        <button title={props.volume > 0 ? 'Mute' : 'Unmute'} onClick={props.toggle}>{props.volume > 0 ? (props.volume > 0.5 ? <Volume_High/> : <Volume_Low/>) : <Mute/>}</button>
     </>)
 }))`
     margin-right: 5px;
@@ -487,8 +501,88 @@ export const ResolutionSelection = styled.div`
     button {
         height: inherit;
         svg {
-            height: 100%;
+            height: 27px;
             fill: #fff;
         }
+    }
+`;
+
+export const MiniPlayerBtn = styled.button.attrs(() => ({
+    children: (<>
+        <div>
+            <div/>
+        </div>
+    </>),
+    title: 'Mini Player'
+}))`
+    height: fit-content;
+    & > div {
+        height: 27px;
+        aspect-ratio: 1.5;
+        border-radius: 5px;
+        border: 2px solid #fff;
+        position: relative;
+
+        div {
+            width: 16px;
+            height: 10px;
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            border-radius: 2px;
+            background-color: ${props => props.theme.primary};
+        }
+    }
+`;
+
+export const TheaterModeBtn = styled.button.attrs((props) => ({
+    children: (<div>
+        <Right_Arrow/>
+        <Right_Arrow/>    
+    </div>),
+    title: (props.activeMode ? 'Default View' : 'Theater Mode')
+}))`
+
+    div {
+        width: 45px;
+        height: 27px;
+        border: 2px solid #fff;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        svg {
+            width: 16px;
+            fill: #fff;
+        }
+        svg:nth-child(1) {
+            transform: rotate(180deg);
+            margin-right: -2px;
+        }
+        svg:nth-child(2) {
+            margin-left: -2px;
+        }
+        ${props => props.activeMode && css`
+            svg:nth-child(1) {
+                transform: unset;
+                margin-right: 1px;
+            }
+            svg:nth-child(2) {
+                transform: rotate(180deg);
+                margin-left: 1px;
+            }
+        `}
+    }
+`;
+
+export const ToggleFullScreen = styled.button.attrs((props) => ({
+    children: (props.activeMode ? <Compress/> : <Expand/>),
+    title: (props.activeMode ? 'Exit Full Screen' : 'Full Screen')
+}))`
+    height: 27px;
+    svg {
+        height: inherit;
+        fill: #fff;
     }
 `;
