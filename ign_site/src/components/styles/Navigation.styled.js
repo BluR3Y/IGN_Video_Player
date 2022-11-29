@@ -134,7 +134,6 @@ export const ContentSelection = styled.div`
     }
 
     @media (max-width: ${deviceSizes.minLaptop - 1}px) {
-        background-color: ${props => props.theme.primary};
         ${StyledSearchBar} {
             flex: 1 1 0;
 

@@ -17,16 +17,42 @@ export default class Playlist extends React.Component {
             activeVideoIndex: null,
             videoDescription: null,
             videoTimeStamps: null,
+            activeVideoComments: null,
+            numVideos: 5,
+            numArticles: 5,
         }
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if(prevState.activeVideoIndex !== this.state.activeVideoIndex)
+        if(prevState.activeVideoIndex !== this.state.activeVideoIndex) {
             this.findTimeStamps();
+            this.setVideoComments();
+        }
     }
 
     componentDidMount() {
-        this.fetchVideos()
+        const { numVideos, numArticles } = this.state;
+        this.fetchVideos(0, numVideos)
+        .then(videos => {
+            var videoIds = videos.map((video) => video.contentId);
+            this.fetchComments(videoIds)
+            .then((videoComments) => {
+                var comments = (this.state.comments ? this.state.comments : {});
+                comments['video'] = videoComments;
+                this.setState({ videos, comments });
+            })
+            .finally(() => this.setState({ activeVideoIndex: 1 }));
+        })
+        this.fetchArticles(0, numArticles)
+        .then(articles => {
+            var articleIds = articles.map((article) => article.contentId);
+            this.fetchComments(articleIds)
+            .then((articleComments) => {
+                var comments = (this.state.comments ? this.state.comments : {});
+                comments['article'] = articleComments;
+                this.setState({ articles, comments });
+            })
+        })
     }
 
     fetchVideos = async (startIndex = 0, count = 10) => {
@@ -44,8 +70,7 @@ export default class Playlist extends React.Component {
             url: apiURL,
             dataType: 'JSONP',
         }).then(res => res.data);
-        console.log(ignVideos)
-        this.setState({ videos: ignVideos, activeVideoIndex: 2 });
+        return ignVideos;
     }
 
     fetchArticles = async (startIndex = 0, count = 10) => {
@@ -63,8 +88,9 @@ export default class Playlist extends React.Component {
             url: apiURL,
             dataType: 'JSONP',
         }).then(res => res.data);
-        console.log(ignArticles)
+        return ignArticles;
     }
+
 
     fetchComments = async (ids = []) => {
         var apiURL = 'https://ign-apis.herokuapp.com/comments';
@@ -74,7 +100,7 @@ export default class Playlist extends React.Component {
             dataType: 'JSONP',
             data: JSON.parse(`{"ids": "${ids}"}`),
         }).then(res => res.content);
-        console.log(ignComments)
+        return ignComments;
     }
 
     findTimeStamps = async () => {
@@ -156,8 +182,14 @@ export default class Playlist extends React.Component {
         return(`${months[date.getMonth()]} ${date.getDate()} ${date.getFullYear()}`);
     }
 
+    setVideoComments = () => {
+        const { videos, activeVideoIndex, comments } = this.state;
+        var activeVideoComments = comments['video'].find((item) => item.id === videos[activeVideoIndex].contentId);
+        this.setState({ activeVideoComments: activeVideoComments.count });
+    }
+
     render() {
-        const { videos, articles, comments, activeVideoIndex, videoDescription } = this.state;
+        const { videos, articles, comments, activeVideoIndex, videoDescription, activeVideoComments } = this.state;
         const { convertTimestamp } = this;
         if(!activeVideoIndex)
             return(<></>)
@@ -167,10 +199,10 @@ export default class Playlist extends React.Component {
                 <div className="videoInfo">
                     <h1>{videos[activeVideoIndex].metadata.title}</h1>
                     <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
-                    <CommentCount count={5000} />
+                    <CommentCount count={activeVideoComments} />
                     <p>{videoDescription}</p>
                     <VideoTags>
-                        {videos[activeVideoIndex]['tags'].map((item, index) => (<li>{item}</li>))}
+                        {videos[activeVideoIndex]['tags'].map((item, index) => (<li key={index}>{item}</li>))}
                     </VideoTags>
                 </div>
             </div>

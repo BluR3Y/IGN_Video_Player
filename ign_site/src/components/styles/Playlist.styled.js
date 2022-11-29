@@ -194,6 +194,6 @@ export const VideoTags = styled.ul`
         padding: 0 10px;
         text-transform: uppercase;
         font-size: 0.9em;
-        margin: 5px 5px;
+        margin: 5px 10px 5px 0;
     }
 `;
