@@ -152,6 +152,15 @@ export const StyledPlaylist = styled.div`
     }
 `;
 
+export const StyledTimeStamps = styled.div`
+    width: inherit;
+
+    img {
+        width: 100%;
+        border: 1px solid red;
+    }
+`;
+
 export const CommentCount = styled.div.attrs((props) => ({
     children: (<>
         <Comment/>

@@ -5,7 +5,7 @@ import VideoPlayer from "./VideoPlayer";
 import VideoQueue from "./VideoQueue";
 import ArticleList from './ArticleList';
 
-import { CommentCount, StyledPlaylist, VideoTags } from './styles/Playlist.styled';
+import { CommentCount, StyledPlaylist, StyledTimeStamps, VideoTags } from './styles/Playlist.styled';
 
 export default class Playlist extends React.Component {
     constructor(props) {
@@ -15,11 +15,12 @@ export default class Playlist extends React.Component {
             videos: null,
             comments: null,
             activeVideoIndex: null,
-            videoDescription: null,
-            videoTimeStamps: null,
+            activeVideoDescription: null,
+            activeVideoTimeStamps: null,
             activeVideoComments: null,
             numVideos: 5,
             numArticles: 5,
+            timeStampFrames: null,
         }
     }
 
@@ -28,6 +29,8 @@ export default class Playlist extends React.Component {
             this.findTimeStamps();
             this.setVideoComments();
         }
+        if(prevState.activeVideoTimeStamps !== this.state.activeVideoTimeStamps)
+            this.captureFrames();
     }
 
     componentDidMount() {
@@ -106,14 +109,14 @@ export default class Playlist extends React.Component {
     findTimeStamps = async () => {
         const { videos, activeVideoIndex } = this.state;
         const videoInfo = videos[activeVideoIndex];
-        var videoDescription = videoInfo['metadata'].description;
-        var videoTimeStamps = this.getTimeStamps(videoDescription);
+        var activeVideoDescription = videoInfo['metadata'].description;
+        var activeVideoTimeStamps = this.getTimeStamps(activeVideoDescription);
 
-        if(videoTimeStamps.length) {
-            videoDescription = videoDescription.substring(0, videoDescription.indexOf(videoTimeStamps[0].timestamp)) + 
-            videoDescription.substring(videoDescription.indexOf(videoTimeStamps[videoTimeStamps.length-1].title)+videoTimeStamps[videoTimeStamps.length-1].title.length);            
+        if(activeVideoTimeStamps.length) {
+            activeVideoDescription = activeVideoDescription.substring(0, activeVideoDescription.indexOf(activeVideoTimeStamps[0].timestamp)) + 
+            activeVideoDescription.substring(activeVideoDescription.indexOf(activeVideoTimeStamps[activeVideoTimeStamps.length-1].title)+activeVideoTimeStamps[activeVideoTimeStamps.length-1].title.length);            
         }
-        this.setState({ videoDescription, videoTimeStamps });
+        this.setState({ activeVideoDescription, activeVideoTimeStamps });
     }
 
     getTimeStamps = (str) => {
@@ -182,6 +185,39 @@ export default class Playlist extends React.Component {
         return(`${months[date.getMonth()]} ${date.getDate()} ${date.getFullYear()}`);
     }
 
+    captureFrames = () => {
+        const { activeVideoIndex, videos, activeVideoTimeStamps } = this.state;
+        const video = document.createElement('video');
+        video.src = videos[activeVideoIndex]['assets'][0].url;
+        var formattedTS = activeVideoTimeStamps.map((timestamp) => {
+            var a = timestamp.timestamp.split(':').reverse();
+            var seconds = 0;
+            for(var i = 0; i < a.length; i++) {
+                if(i == 0) 
+                    seconds += parseInt(a[i]);
+                else
+                    seconds += parseInt(a[i]) * Math.pow(60, i);
+            }
+            return seconds;
+        })
+        const onLoad = (event,timestamps) => {
+            const canvas = document.createElement('canvas');
+            const video = event.currentTarget;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            var captures = timestamps.map((time) => {
+                video.currentTime = time;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                return canvas.toDataURL();
+            })
+            console.log(captures)
+            this.setState({ timeStampFrames: captures });
+        };
+        video.addEventListener('loadedmetadata', (event) => onLoad(event, formattedTS));
+        return () => video.removeEventListener('load', onLoad);
+    }
+ 
     setVideoComments = () => {
         const { videos, activeVideoIndex, comments } = this.state;
         var activeVideoComments = comments['video'].find((item) => item.id === videos[activeVideoIndex].contentId);
@@ -189,7 +225,7 @@ export default class Playlist extends React.Component {
     }
 
     render() {
-        const { videos, articles, comments, activeVideoIndex, videoDescription, activeVideoComments } = this.state;
+        const { videos, articles, comments, activeVideoIndex, activeVideoDescription, activeVideoComments, timeStampFrames } = this.state;
         const { convertTimestamp } = this;
         if(!activeVideoIndex)
             return(<></>)
@@ -200,7 +236,12 @@ export default class Playlist extends React.Component {
                     <h1>{videos[activeVideoIndex].metadata.title}</h1>
                     <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
                     <CommentCount count={activeVideoComments} />
-                    <p>{videoDescription}</p>
+                    {timeStampFrames && (
+                        <StyledTimeStamps>
+                            {timeStampFrames.map((image, index) => (<img src={image} key={index} />))}
+                        </StyledTimeStamps>
+                    )}
+                    <p>{activeVideoDescription}</p>
                     <VideoTags>
                         {videos[activeVideoIndex]['tags'].map((item, index) => (<li key={index}>{item}</li>))}
                     </VideoTags>
