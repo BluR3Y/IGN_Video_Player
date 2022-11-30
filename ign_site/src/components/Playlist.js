@@ -21,6 +21,7 @@ export default class Playlist extends React.Component {
             numVideos: 5,
             numArticles: 5,
             timeStampFrames: null,
+            componentError: false,
         }
     }
 
@@ -29,8 +30,8 @@ export default class Playlist extends React.Component {
             this.findTimeStamps();
             this.setVideoComments();
         }
-        if(prevState.activeVideoTimeStamps !== this.state.activeVideoTimeStamps)
-            this.captureFrames();
+        if(prevState.activeVideoTimeStamps !== this.state.activeVideoTimeStamps){}
+            // this.captureFrames();
     }
 
     componentDidMount() {
@@ -46,6 +47,10 @@ export default class Playlist extends React.Component {
             })
             .finally(() => this.setState({ activeVideoIndex: 1 }));
         })
+        .catch(err => {
+            console.error('Error While fetching videos: ', err);
+            this.setState({componentError : err});
+        })
         this.fetchArticles(0, numArticles)
         .then(articles => {
             var articleIds = articles.map((article) => article.contentId);
@@ -55,6 +60,10 @@ export default class Playlist extends React.Component {
                 comments['article'] = articleComments;
                 this.setState({ articles, comments });
             })
+        })
+        .catch(err => {
+            console.error('Error While fetching articles: ', err);
+            this.setState({componentError : err});
         })
     }
 
@@ -112,7 +121,7 @@ export default class Playlist extends React.Component {
         var activeVideoDescription = videoInfo['metadata'].description;
         var activeVideoTimeStamps = this.getTimeStamps(activeVideoDescription);
 
-        if(activeVideoTimeStamps.length) {
+        if(activeVideoTimeStamps) {
             activeVideoDescription = activeVideoDescription.substring(0, activeVideoDescription.indexOf(activeVideoTimeStamps[0].timestamp)) + 
             activeVideoDescription.substring(activeVideoDescription.indexOf(activeVideoTimeStamps[activeVideoTimeStamps.length-1].title)+activeVideoTimeStamps[activeVideoTimeStamps.length-1].title.length);            
         }
@@ -126,7 +135,7 @@ export default class Playlist extends React.Component {
         for(var i =0; i < str.length-4; i++) {
             if(!isNaN(parseFloat(str[i]))) {
                 var j = i+1;
-                for(; j < str.length && str[j] !== ' '; j++);
+                for(; j < str.length && ((/^\d+$/).test(str[j]) || str[j] === ':'); j++);
                 var subStr = str.substring(i,j);
                 if(this.isTimeStamp(subStr)) {
                     if(lastTSIndex) {
@@ -142,7 +151,7 @@ export default class Playlist extends React.Component {
                     lastTSIndex = j;
                 }
 
-                i = i+(j-i+1);
+                i = j;
             }
         }
         if(lastTSIndex) {
@@ -161,18 +170,16 @@ export default class Playlist extends React.Component {
             timeStamps.push({ timestamp: lastTimeStamp, title: prevTitle });
         }
 
-        return timeStamps;
+        return timeStamps.length ? timeStamps : null;
     }
 
     isTimeStamp = (str) => {
-        if(str.length < 5 || str.length % 3 !== 2)
+        var parts = str.split(':');
+        if(parts.length < 2) 
             return false;
-        for(var i = 1; i <= str.length; i++) {
-            if(i % 3 === 0) {
-                if(str[i-1] !== ':')
-                    return false;
-            }else{
-                if(isNaN(str[i-1]))
+        for(const part of parts) {
+            for(const char of part) {
+                if(isNaN(char))
                     return false;
             }
         }
@@ -185,38 +192,7 @@ export default class Playlist extends React.Component {
         return(`${months[date.getMonth()]} ${date.getDate()} ${date.getFullYear()}`);
     }
 
-    captureFrames = () => {
-        const { activeVideoIndex, videos, activeVideoTimeStamps } = this.state;
-        const video = document.createElement('video');
-        video.src = videos[activeVideoIndex]['assets'][0].url;
-        var formattedTS = activeVideoTimeStamps.map((timestamp) => {
-            var a = timestamp.timestamp.split(':').reverse();
-            var seconds = 0;
-            for(var i = 0; i < a.length; i++) {
-                if(i == 0) 
-                    seconds += parseInt(a[i]);
-                else
-                    seconds += parseInt(a[i]) * Math.pow(60, i);
-            }
-            return seconds;
-        })
-        const onLoad = (event,timestamps) => {
-            const canvas = document.createElement('canvas');
-            const video = event.currentTarget;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            var captures = timestamps.map((time) => {
-                video.currentTime = time;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0);
-                return canvas.toDataURL();
-            })
-            console.log(captures)
-            this.setState({ timeStampFrames: captures });
-        };
-        video.addEventListener('loadedmetadata', (event) => onLoad(event, formattedTS));
-        return () => video.removeEventListener('load', onLoad);
-    }
+
  
     setVideoComments = () => {
         const { videos, activeVideoIndex, comments } = this.state;
@@ -225,30 +201,31 @@ export default class Playlist extends React.Component {
     }
 
     render() {
-        const { videos, articles, comments, activeVideoIndex, activeVideoDescription, activeVideoComments, timeStampFrames } = this.state;
+        const { videos, articles, comments, activeVideoIndex, activeVideoDescription, activeVideoComments, timeStampFrames, componentError } = this.state;
         const { convertTimestamp } = this;
-        if(!activeVideoIndex)
-            return(<></>)
+        
         return(<StyledPlaylist>
             <div className="activeVideo">
-                <VideoPlayer videoInfo={videos[activeVideoIndex]} />
-                <div className="videoInfo">
-                    <h1>{videos[activeVideoIndex].metadata.title}</h1>
-                    <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
-                    <CommentCount count={activeVideoComments} />
-                    {timeStampFrames && (
-                        <StyledTimeStamps>
-                            {timeStampFrames.map((image, index) => (<img src={image} key={index} />))}
-                        </StyledTimeStamps>
-                    )}
-                    <p>{activeVideoDescription}</p>
-                    <VideoTags>
-                        {videos[activeVideoIndex]['tags'].map((item, index) => (<li key={index}>{item}</li>))}
-                    </VideoTags>
-                </div>
+                <VideoPlayer videoInfo={videos ? videos[activeVideoIndex] : null} />
+                {activeVideoIndex && (
+                    <div className="videoInfo">
+                        <h1>{videos[activeVideoIndex].metadata.title}</h1>
+                        <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
+                        <CommentCount count={activeVideoComments} />
+                        {timeStampFrames && (
+                            <StyledTimeStamps>
+                                {timeStampFrames.map((image, index) => (<img src={image} key={index} />))}
+                            </StyledTimeStamps>
+                        )}
+                        <p>{activeVideoDescription}</p>
+                        <VideoTags>
+                            {videos[activeVideoIndex]['tags'].map((item, index) => (<li key={index}>{item}</li>))}
+                        </VideoTags>
+                    </div>
+                )}
             </div>
-            <VideoQueue videos={videos}/>
-            <ArticleList/>
+            {/* <VideoQueue videos={videos}/>
+            <ArticleList/> */}
         </StyledPlaylist>);
     }
 }

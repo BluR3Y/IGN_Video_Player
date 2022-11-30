@@ -44,6 +44,13 @@ export const StyledVideoPlayer = styled.div`
     `}
 `;
 
+export const StyledLoadingVideoPlayer = styled.div`
+    border: 1px solid red;
+    aspect-ratio: 2;
+    border-radius: 10px;
+    
+`;
+
 export const StyledVideoPlayerLoading = styled.div.attrs(() => ({
     children: (<>
         <span></span>

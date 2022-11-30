@@ -11,6 +11,7 @@ import {
     ResolutionInput, 
     ResolutionSelection, 
     ShareVideoBtn, 
+    StyledLoadingVideoPlayer, 
     StyledVideoPlayer, 
     StyledVideoPlayerLoading, 
     TheaterModeBtn, 
@@ -51,6 +52,9 @@ export default class VideoPlayer extends React.Component {
     }
 
     componentDidMount() {
+        if(this.state.videoInfo === null)
+            return;
+
         this.setActiveThumbnail();
         const { isActive, autoPlay } = this.state;
         if(!isActive && autoPlay)
@@ -226,6 +230,11 @@ export default class VideoPlayer extends React.Component {
             setResolution,
             toggleFullScreen
         } = this;
+
+        if(videoInfo === null) {
+            return <StyledLoadingVideoPlayer/>
+        }
+
         return(<StyledVideoPlayer 
             ref={videoPlayer} 
             idle={isIdle}   
