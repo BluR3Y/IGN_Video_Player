@@ -63,7 +63,7 @@ export default class Navigation extends React.Component {
         const { searchBarRef } = this.state;
         var gamesURL = 'https://api.rawg.io/api/games?';
         var searchParams = {
-            key: '065c4dbc64ad478496a7db0c70ec2765',
+            key: process.env.REACT_APP_RAWG_API_KEY,
             search: searchQuery,
             page_size: 5,
             search_precise: true,
@@ -83,7 +83,7 @@ export default class Navigation extends React.Component {
 
             var moviesURL = 'https://api.themoviedb.org/3/search/movie?';
             searchParams = {
-                api_key: '4a650f3febf12eb35af0857fc78a9608',
+                api_key: process.env.REACT_APP_MOVIE_DB_API_KEY,
                 query: searchQuery,
             }
             for (const property in searchParams) {
@@ -124,7 +124,7 @@ export default class Navigation extends React.Component {
     getTrendingGames = async () => {
         var gamesURL = 'https://rawg.io/api/games/lists/greatest?';
         var searchParams = {
-            key: '065c4dbc64ad478496a7db0c70ec2765',
+            key: process.env.REACT_APP_RAWG_API_KEY,
             discover: true,
             ordering: '-added',
             page_size: 10,

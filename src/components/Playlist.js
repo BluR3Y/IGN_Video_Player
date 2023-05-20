@@ -15,10 +15,11 @@ export default class Playlist extends React.Component {
     }
 
     fetchVideos = async () => {
-        var URL = 'https://ign-apis.herokuapp.com/videos?startIndex=30\u0026count=5';
-        var videos = await fetch(URL);
-        videos = videos.json();
-        console.log(videos)
+        // var URL = 'https://ign-apis.herokuapp.com/videos?startIndex=30\u0026count=5';
+        // var videos = await fetch(URL);
+        // videos = videos.json();
+        // console.log(videos)
+        console.log('boof')
     }
 
     render() {
