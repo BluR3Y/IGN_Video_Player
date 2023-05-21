@@ -38,6 +38,7 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.0.1",
     "babel-plugin-styled-components": "^2.0.7"
   }
 }

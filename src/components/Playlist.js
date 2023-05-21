@@ -1,5 +1,6 @@
 import React from "react";
 import $ from "jquery";
+import { faker } from '@faker-js/faker';
 
 import VideoPlayer from "./VideoPlayer";
 import VideoQueue from "./VideoQueue";
@@ -7,19 +8,19 @@ import ArticleList from './ArticleList';
 
 import { CommentCount, StyledPlaylist, StyledTimeStamps, VideoTags } from './styles/Playlist.styled';
 
+import Videos from '../data/videos.json';
+import Articles from '../data/articles.json';
+
 export default class Playlist extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             articles: null,
             videos: null,
-            comments: null,
             activeVideoIndex: null,
             activeVideoDescription: null,
             activeVideoTimeStamps: null,
             activeVideoComments: null,
-            numVideos: 5,
-            numArticles: 5,
             timeStampFrames: null,
             componentError: false,
         }
@@ -35,90 +36,55 @@ export default class Playlist extends React.Component {
     }
 
     componentDidMount() {
-        const { numVideos, numArticles } = this.state;
-        this.fetchVideos(0, numVideos)
-        .then(videos => {
-            var videoIds = videos.map((video) => video.contentId);
-            this.fetchComments(videoIds)
-            .then((videoComments) => {
-                var comments = (this.state.comments ? this.state.comments : {});
-                comments['video'] = videoComments;
-                this.setState({ videos, comments });
-            })
-            .finally(() => this.setState({ activeVideoIndex: 1 }));
-        })
+        Promise.all([
+            this.fetchVideos()
+            .then(videos => this.setState({
+                videos: videos.map(item => this.generateMissingVideoData(item)),
+                activeVideoIndex: 0
+            })),
+            this.fetchArticles()
+            .then(articles => this.setState({
+                articles: articles.map(item => ({
+                    ...item,
+                    commentCount: Math.floor(Math.random() * 200)
+                }))
+            }))
+        ])
         .catch(err => {
-            console.error('Error While fetching videos: ', err);
-            this.setState({componentError : err});
-        })
-        this.fetchArticles(0, numArticles)
-        .then(articles => {
-            var articleIds = articles.map((article) => article.contentId);
-            this.fetchComments(articleIds)
-            .then((articleComments) => {
-                var comments = (this.state.comments ? this.state.comments : {});
-                comments['article'] = articleComments;
-                this.setState({ articles, comments });
-            })
-        })
-        .catch(err => {
-            console.error('Error While fetching articles: ', err);
-            this.setState({componentError : err});
-        })
+            console.error('Error occured while fetching content: ', err);
+            this.setState({ componentError: err });
+        });
     }
 
-    fetchVideos = async (startIndex = 0, count = 10) => {
-        var apiURL = 'https://ign-apis.herokuapp.com/videos?';
-        var requestParams = {
-            startIndex: startIndex,
-            count: count,
-        }
-        for(const property in requestParams) {
-            apiURL += `${property}=${requestParams[property]}&`;
-        }
-
-        var ignVideos = await $.ajax({
-            type: 'GET',
-            url: apiURL,
-            dataType: 'JSONP',
-        }).then(res => res.data);
-        return ignVideos;
+    fetchVideos = async (startIndex = 0, count = 5) => {
+        return Videos;
     }
 
     fetchArticles = async (startIndex = 0, count = 10) => {
-        var apiURL = 'https://ign-apis.herokuapp.com/articles?';
-        var requestParams = {
-            startIndex: startIndex,
-            count: count,
-        }
-        for(const property in requestParams) {
-            apiURL += `${property}=${requestParams[property]}&`;
-        }
-
-        var ignArticles = await $.ajax({
-            type: 'GET',
-            url: apiURL,
-            dataType: 'JSONP',
-        }).then(res => res.data);
-        return ignArticles;
+        return Articles;
     }
 
-
-    fetchComments = async (ids = []) => {
-        var apiURL = 'https://ign-apis.herokuapp.com/comments';
-        var ignComments = await $.ajax({
-            type: 'POST',
-            url: apiURL,
-            dataType: 'JSONP',
-            data: JSON.parse(`{"ids": "${ids}"}`),
-        }).then(res => res.content);
-        return ignComments;
-    }
+    // IGN deciding to remove their public api required that I use 'unique' methods to tretrieve their content
+    generateMissingVideoData = (videoInfo) => ({
+        ...videoInfo,
+        commentCount: Math.floor(Math.random() * 200),
+        metadata: {
+            ...videoInfo.metadata,
+            description: faker.lorem.paragraph(),
+            publishDate: faker.date.anytime()
+        },
+        tags: (() => {
+            const tags = [];
+            for (var i = 0; i < 15; i++)
+                tags.push(faker.lorem.word());
+            return tags;
+        })()
+    });
 
     findTimeStamps = async () => {
         const { videos, activeVideoIndex } = this.state;
         const videoInfo = videos[activeVideoIndex];
-        var activeVideoDescription = videoInfo['metadata'].description;
+        var activeVideoDescription = videoInfo['metadata'].description || '';
         var activeVideoTimeStamps = this.getTimeStamps(activeVideoDescription);
 
         if(activeVideoTimeStamps) {
@@ -191,41 +157,42 @@ export default class Playlist extends React.Component {
         var date = new Date(timestamp);
         return(`${months[date.getMonth()]} ${date.getDate()} ${date.getFullYear()}`);
     }
-
-
  
     setVideoComments = () => {
-        const { videos, activeVideoIndex, comments } = this.state;
-        var activeVideoComments = comments['video'].find((item) => item.id === videos[activeVideoIndex].contentId);
-        this.setState({ activeVideoComments: activeVideoComments.count });
+        const activeVideoComments = [];
+        for (var i = 0; i < 15; i++)
+            activeVideoComments.push(faker.lorem.paragraph());
+        return activeVideoComments;
     }
 
     render() {
-        const { videos, articles, comments, activeVideoIndex, activeVideoDescription, activeVideoComments, timeStampFrames, componentError } = this.state;
+        const { videos, articles, activeVideoIndex, activeVideoDescription, activeVideoComments, timeStampFrames, componentError } = this.state;
         const { convertTimestamp } = this;
-        
-        return(<StyledPlaylist>
-            <div className="activeVideo">
-                <VideoPlayer videoInfo={videos ? videos[activeVideoIndex] : null} />
-                {activeVideoIndex && (
+        const activeVideo = activeVideoIndex !== null ? videos[activeVideoIndex] : null;
+        return <StyledPlaylist>
+            {activeVideo && (
+                <div className="activeVideo">
+                    <VideoPlayer videoInfo={activeVideo} />
                     <div className="videoInfo">
                         <h1>{videos[activeVideoIndex].metadata.title}</h1>
                         <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
-                        <CommentCount count={activeVideoComments} />
+                        <CommentCount count={videos[activeVideoIndex].commentCount} />
                         {timeStampFrames && (
                             <StyledTimeStamps>
                                 {timeStampFrames.map((image, index) => (<img src={image} key={index} />))}
                             </StyledTimeStamps>
                         )}
                         <p>{activeVideoDescription}</p>
-                        <VideoTags>
-                            {videos[activeVideoIndex]['tags'].map((item, index) => (<li key={index}>{item}</li>))}
-                        </VideoTags>
+                        { activeVideo.tags?.length && (
+                            <VideoTags>
+                                { activeVideo.tags.map((item, index) => (<li key={index}>{item}</li>)) }
+                            </VideoTags>
+                        ) }
                     </div>
-                )}
-            </div>
+                </div>
+            )}
             {/* <VideoQueue videos={videos}/>
             <ArticleList/> */}
-        </StyledPlaylist>);
+        </StyledPlaylist>
     }
 }
