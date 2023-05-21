@@ -70,7 +70,7 @@ export default class Playlist extends React.Component {
         commentCount: Math.floor(Math.random() * 200),
         metadata: {
             ...videoInfo.metadata,
-            description: faker.lorem.paragraph(),
+            description: faker.lorem.paragraph(10),
             publishDate: faker.date.anytime()
         },
         tags: (() => {
@@ -191,8 +191,10 @@ export default class Playlist extends React.Component {
                     </div>
                 </div>
             )}
-            {/* <VideoQueue videos={videos}/>
-            <ArticleList/> */}
+            { videos && (
+                <VideoQueue videos={videos} activeIndex={activeVideoIndex}/>
+            ) }
+            {/* <ArticleList/> */}
         </StyledPlaylist>
     }
 }
