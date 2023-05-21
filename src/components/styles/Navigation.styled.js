@@ -44,6 +44,7 @@ export const Nav_Container = styled.div`
     flex-direction: column;
     box-shadow: 0 1px #cdcdcd;
     user-select: none;
+    flex: 0 0 auto;
 
     .navMain {
         display: flex;
@@ -95,7 +96,7 @@ export const Nav_Container = styled.div`
 
     @media ${breakPoints.laptop} {
         & > div {
-            padding: 0 80px;
+            padding: 0 40px;
         }
         
         .navMain {
@@ -133,7 +134,6 @@ export const ContentSelection = styled.div`
     }
 
     @media (max-width: ${deviceSizes.minLaptop - 1}px) {
-        background-color: ${props => props.theme.primary};
         ${StyledSearchBar} {
             flex: 1 1 0;
 
