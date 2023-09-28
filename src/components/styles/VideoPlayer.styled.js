@@ -11,6 +11,8 @@ import Volume_Low from '../../assets/icons/volume_low';
 import Right_Arrow from '../../assets/icons/right_arrow';
 import Expand from '../../assets/icons/expand';
 import Compress from '../../assets/icons/compress';
+import Book_Close from "../../assets/icons/book_close";
+import Book_Open from "../../assets/icons/book_open";
 
 export const StyledVideoPlayer = styled.div`
     width: 100%;
@@ -27,7 +29,7 @@ export const StyledVideoPlayer = styled.div`
         width: 100%;
         height: auto;
         display: block;
-        visibility: ${props => props.isLoaded ? 'visible' : 'hidden'};
+        visibility: ${props => props.isReadyToPlay ? 'visible' : 'hidden'};
     }
 
     ${props => props.idle && css`
@@ -237,7 +239,7 @@ export const Controls = styled.div`
     flex-direction: column;
     justify-content: flex-end;
     padding: 0 20px;
-    height: 150px;
+    /* height: 150px; */
     visibility: hidden;
     transition: opacity 0.10s linear;
     background-image: linear-gradient(to top, black 0%, transparent 100%);
@@ -270,7 +272,6 @@ export const AutoPlayBtn = styled.button.attrs((props) => ({
         <h1>Autoplay setting: <span>{props.autoPlay ? 'On' : 'Off'}</span></h1>
     </>)
 }))`
-    position: absolute;
     z-index: 2;
     height: 40px;
     width: 220px;
@@ -335,18 +336,49 @@ export const AutoPlayBtn = styled.button.attrs((props) => ({
     }
 
     ${props => props.isActive ? css`    //controls
+        position: relative;
         flex-direction: row;
         top: 0;
-        left: ${props => props.isPlaying ? '-240px' : '20px'};
+        left: ${props => props.isPlaying ? '-240px' : '0'};
         transition: left 0.10s linear;
         background-color: #202634;
     ` : css`    // thumbnail
+        position: absolute;
         right: 20px;
         bottom: 20px;
         flex-direction: row-reverse;
         background-color: transparent;
         visibility: visible;
     `}
+`;
+
+export const VideoChapters = styled.div`
+    height: 100px;
+    display: ${props => props.isOpen ? 'flex' : 'none'};
+    flex-direction: row;
+    margin-top: 5px;
+    overflow: hidden;
+
+    background-color: red;
+`;
+
+export const ChapterItem = styled.div.attrs((props) => ({
+    children: (<>
+        <img src={props.chapterPosterSrc} />
+        // Last Here
+    </>)
+}))`
+    height: inherit;
+    aspect-ratio: 1.6;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    img {
+        border-radius: 4px;
+    }
+
+    background-color: green;
 `;
 
 export const RangeSlider = styled.input.attrs(() => ({
@@ -497,6 +529,19 @@ export const ResolutionForm = styled.form`
     transform: translateX(-50%);
     display:flex;
     flex-direction: column;
+`;
+
+export const ToggleVideoChapters = styled.button.attrs((props) => ({
+    children: (props.open ? <Book_Open/> : <Book_Close/>),
+    title: (props.open ? 'Close Chapters' : 'Open Chapters')
+}))`
+    height: 27px;
+    width: 35px;
+    svg {
+        height: inherit;
+        fill: #fff;
+        margin: auto;
+    }
 `;
 
 export const ResolutionSelection = styled.div`

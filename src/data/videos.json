@@ -24,6 +24,36 @@
             "liveOnAir": false,
             "__typename": "PlayerPropsExtra"
         },
+        "chapters": [
+            {
+                "time": 30,
+                "description": "Lorem ipsum dolor sit amet,"
+            },
+            {
+                "time": 60,
+                "description": "consectetur adipiscing elit"
+            },
+            {
+                "time": 120,
+                "description": "sed do eiusmod tempor incididunt"
+            },
+            {
+                "time": 180,
+                "description": "ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+            },
+            {
+                "time": 240,
+                "description": "quis nostrud exercitation ullamco laboris"
+            },
+            {
+                "time": 280,
+                "description": "Duis aute irure dolor in reprehenderit in voluptate"
+            },
+            {
+                "time": 320,
+                "description": "sed do eiusmod tempor incididunt"
+            }
+        ],
         "refs": {
             "m3uUrl": "https://assets7.ign.com/master/videos/zencoder/2020/06/11/,416/232386579b33444329bfe3fd51382187-110000,640/232386579b33444329bfe3fd51382187-1000000,960/232386579b33444329bfe3fd51382187-1500000,1280/232386579b33444329bfe3fd51382187-2500000,1920/232386579b33444329bfe3fd51382187-6500000,-1591923863/master.m3u8",
             "captions": null,

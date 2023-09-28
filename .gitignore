@@ -14,9 +14,6 @@
 # production
 /build
 
-# Environment Variables
-.env
-
 # misc
 .DS_Store
 .env.local

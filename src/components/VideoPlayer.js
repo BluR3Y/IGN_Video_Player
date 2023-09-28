@@ -1,7 +1,8 @@
 import React from "react";
 
 import { 
-    AutoPlayBtn, 
+    AutoPlayBtn,
+    VideoChapters,
     Controls, 
     Header, 
     MainControls, 
@@ -18,7 +19,9 @@ import {
     Thumbnail, 
     ToggleFullScreen, 
     TogglePlayPause, 
-    ToggleVolume 
+    ToggleVolume,
+    ToggleVideoChapters,
+    ChapterItem
 } from "./styles/VideoPlayer.styled";
 
 import Standard_Definition from '../assets/icons/standard_definition';
@@ -34,31 +37,31 @@ export default class VideoPlayer extends React.Component {
             isActive: false,
             isPlaying: false,
             isMuted: true,
-            autoPlay: false,
+            autoPlay: true,
             idleTimer: null,
             isIdle: false,
             volume: 1,
-            isLoaded: false,
+            isReadyToPlay: false,
             videoElapsedTime: 0,
             resolutionMenuOpen: false,
+            chaptersOpen: true,
             miniPlayerMode: false,
             theaterMode: false,
             fullscreenMode: false,
+            chapterEntries: [],
             videoPlayer: React.createRef(),
             progressBar: React.createRef(),
             volumeSlider: React.createRef(),
+            chapterContainer: React.createRef(),
             media: React.createRef()
         }
     }
 
     componentDidMount() {
-        if(this.state.videoInfo === null)
+        if(this.state.videoInfo === null) {
             return;
-
+        }
         this.setActiveThumbnail();
-        const { isActive, autoPlay } = this.state;
-        if(!isActive && autoPlay)
-            this.startVideo();
 
         window.addEventListener('resize', this.setActiveThumbnail);
     }
@@ -67,11 +70,25 @@ export default class VideoPlayer extends React.Component {
         window.removeEventListener('resize', this.setActiveThumbnail);
     }
 
+    componentDidMount() {
+        const {
+            videoInfo
+        } = this.state;
+
+        if (videoInfo === null) {
+            return;
+        }
+        this.setActiveThumbnail();
+    }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
 
-        if(prevState.activeVideoIndex !== this.state.activeVideoIndex)
+        if(prevState.activeVideoIndex !== this.state.activeVideoIndex) {
             this.handleActiveVideoIndexChange(prevState.videoElapsedTime, prevState.isPlaying);
+        }
+        if (prevState.isReadyToPlay !== this.state.isReadyToPlay && (!this.state.isActive && this.state.autoPlay)) {
+            this.startVideo();
+        }
     }
 
     setActiveThumbnail = () => {
@@ -88,7 +105,11 @@ export default class VideoPlayer extends React.Component {
     }
 
     startVideo = () => {
-        const { media, videoPlayer } = this.state;
+        const { media, videoPlayer, isReadyToPlay } = this.state;
+        if (!isReadyToPlay) {
+            return;
+        }
+
         var playMedia = media.current.play();
         if(playMedia !== undefined) {
             playMedia.then(_ => {
@@ -143,7 +164,7 @@ export default class VideoPlayer extends React.Component {
 
     setResolution = (event) => {
         var activeVideoIndex = event.target.value;
-        this.setState({ activeVideoIndex, resolutionMenuOpen: false, isLoaded: false });
+        this.setState({ activeVideoIndex, resolutionMenuOpen: false, isReadyToPlay: false });
     }
 
     handleActiveVideoIndexChange = (prevElapsedTime, prevIsPlaying) => {
@@ -155,9 +176,14 @@ export default class VideoPlayer extends React.Component {
     }
 
     handleLoadedVideo = () => {
-        const { videoElapsedTime } = this.state;
+        const { media, videoElapsedTime, videoInfo, isActive, autoPlay } = this.state;
 
-        this.setState({ isLoaded: true });
+        if (videoInfo.chapters?.length > 0) {
+            media.current.addEventListener('seeked', this.captureChapterFrames);
+            media.current.currentTime = videoInfo.chapters[0].time;
+        } else {
+            this.setState({ isReadyToPlay: true });
+        }
     }
 
     copyToClipBoard = () => {
@@ -169,7 +195,7 @@ export default class VideoPlayer extends React.Component {
         if(document.fullscreenElement) {
             document.exitFullscreen()
             .then(() => this.setState({ fullscreenMode:false }))
-            .catch((err) => console.error('Error While Exiting Full Screen: ',err));
+            .catch((err) => console.error('Error While Exiting Full Screen: ', err));
         }else{
             videoPlayer.current.requestFullscreen()
             .then(() => this.setState({ fullscreenMode: true }))
@@ -188,6 +214,38 @@ export default class VideoPlayer extends React.Component {
         // this.setState({ idleTimer, isIdle });
     }
 
+    captureChapterFrames = () => {
+        // Take into account invalid times
+        const { media, videoInfo, chapterEntries } = this.state;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        var currentCapture = chapterEntries.length;
+
+        canvas.width = media.current.videoWidth;
+        canvas.height = media.current.videoHeight;
+        context.drawImage(media.current, 0, 0, canvas.width, canvas.height);
+
+        // const frameImage = new Image();
+        // frameImage.src = canvas.toDataURL();
+        // // frameImage.alt = `Frame at ${videoInfo.chapters[currentCapture].time} seconds`;
+        // console.log(frameImage)
+        // chapterContainer.current.appendChild(frameImage);
+
+        this.setState({ chapterEntries: [...chapterEntries, <ChapterItem
+            key={currentCapture}
+            chapterPosterSrc={canvas.toDataURL()}
+        />] });
+        console.log(chapterEntries)
+
+        if (++currentCapture < videoInfo.chapters.length) {
+            media.current.currentTime = videoInfo.chapters[currentCapture].time;
+        } else {
+            media.current.removeEventListener('seeked', this.captureChapterFrames);
+            media.current.currentTime = 0;
+            this.setState({ isReadyToPlay: true });
+        }
+    }
+
     HH_MM_SS = seconds => {
         return (seconds < 3600 ? 
             new Date(seconds * 1000).toISOString().substring(14, 19) :
@@ -203,7 +261,8 @@ export default class VideoPlayer extends React.Component {
             autoPlay, 
             media, 
             videoPlayer, 
-            volumeSlider, 
+            volumeSlider,
+            chapterContainer,
             isActive, 
             theaterMode, 
             isPlaying, 
@@ -212,9 +271,11 @@ export default class VideoPlayer extends React.Component {
             isIdle, 
             volume, 
             isMuted, 
-            resolutionMenuOpen, 
-            isLoaded,
-            fullscreenMode
+            resolutionMenuOpen,
+            chaptersOpen,
+            isReadyToPlay,
+            fullscreenMode,
+            chapterEntries
         } = this.state;
         const { 
             startVideo, 
@@ -238,7 +299,7 @@ export default class VideoPlayer extends React.Component {
         return(<StyledVideoPlayer 
             ref={videoPlayer} 
             idle={isIdle}   
-            isLoaded={isLoaded}
+            isReadyToPlay={isReadyToPlay}
             miniPlayerMode={miniPlayerMode}
             aspectRatio={videoInfo['assets'][activeVideoIndex].width / videoInfo['assets'][activeVideoIndex].height}
         >
@@ -252,7 +313,7 @@ export default class VideoPlayer extends React.Component {
                 onClick={startVideo}
                 isActive={isActive}
             />
-            {!isLoaded && <StyledVideoPlayerLoading/>}
+            {!isReadyToPlay && <StyledVideoPlayerLoading/>}
             <video 
                 ref={media} 
                 onClick={playPauseMedia}
@@ -260,6 +321,7 @@ export default class VideoPlayer extends React.Component {
                 onVolumeChange={handleVolumeChange}
                 muted={isMuted}
                 onLoadedData={handleLoadedVideo}
+                crossOrigin="anonymous"
                 onPlay={() => this.setState({ isPlaying: true })}
                 onPause={() => this.setState({ isPlaying: false })}
             >
@@ -275,6 +337,10 @@ export default class VideoPlayer extends React.Component {
                     autoPlay={autoPlay} 
                     onClick={() => this.setState(prevState => ({ autoPlay: !prevState.autoPlay }))}
                 />
+                <VideoChapters
+                    ref={chapterContainer}
+                    isOpen={chaptersOpen}
+                >{chapterEntries}</VideoChapters>
                 <RangeSlider
                     min='0'
                     max={videoInfo.metadata.duration}
@@ -302,6 +368,7 @@ export default class VideoPlayer extends React.Component {
                         <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoInfo.metadata.duration)}`}</h1>
                     </div>
                     <div className="rightControls">
+                        <ToggleVideoChapters open={chaptersOpen} onClick={() => this.setState(prevState => ({ chaptersOpen : !prevState.chaptersOpen }))}/>
                         <ResolutionSelection open={resolutionMenuOpen}>
                             <button
                                 title={'Video Quality'}
