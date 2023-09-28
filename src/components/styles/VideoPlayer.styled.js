@@ -353,32 +353,57 @@ export const AutoPlayBtn = styled.button.attrs((props) => ({
 `;
 
 export const VideoChapters = styled.div`
-    height: 100px;
+    height: 109px;
     display: ${props => props.isOpen ? 'flex' : 'none'};
     flex-direction: row;
+    gap: 10px;
+    align-items: center;
     margin-top: 5px;
-    overflow: hidden;
+    overflow-x: scroll;
+    overflow-y: none;
 
-    background-color: red;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 `;
 
-export const ChapterItem = styled.div.attrs((props) => ({
+export const ChapterItem = styled.button.attrs((props) => ({
     children: (<>
-        <img src={props.chapterPosterSrc} />
-        // Last Here
+        <img src={props.posterSrc} />
+        <h1>{props.chapterTitle}</h1>
     </>)
 }))`
     height: inherit;
-    aspect-ratio: 1.6;
+    width: 130px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    font-size: 0.65em;
+    flex: 0 0 auto;
+    border-radius: 5px;
+    padding: 4px 3px;
 
     img {
-        border-radius: 4px;
+        border-radius: inherit;
+        width: 100%;
+        aspect-ratio: 1.8;
+    }
+    h1 {
+        font-size: 1em;
+        margin-top: 3px;
+        display: -webkit-box;
+        line-height: 1.25em;
+        font-weight: lighter;
+        text-align: center;
+        -webkit-line-clamp: 2;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
     }
 
-    background-color: green;
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.18);
+    }
 `;
 
 export const RangeSlider = styled.input.attrs(() => ({

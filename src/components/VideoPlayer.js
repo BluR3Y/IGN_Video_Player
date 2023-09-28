@@ -176,9 +176,9 @@ export default class VideoPlayer extends React.Component {
     }
 
     handleLoadedVideo = () => {
-        const { media, videoElapsedTime, videoInfo, isActive, autoPlay } = this.state;
+        const { media, videoElapsedTime, videoInfo, isActive, autoPlay, chapterEntries } = this.state;
 
-        if (videoInfo.chapters?.length > 0) {
+        if (videoInfo.chapters?.length > 0 && chapterEntries.length !== videoInfo.chapters.length) {
             media.current.addEventListener('seeked', this.captureChapterFrames);
             media.current.currentTime = videoInfo.chapters[0].time;
         } else {
@@ -225,15 +225,12 @@ export default class VideoPlayer extends React.Component {
         canvas.height = media.current.videoHeight;
         context.drawImage(media.current, 0, 0, canvas.width, canvas.height);
 
-        // const frameImage = new Image();
-        // frameImage.src = canvas.toDataURL();
-        // // frameImage.alt = `Frame at ${videoInfo.chapters[currentCapture].time} seconds`;
-        // console.log(frameImage)
-        // chapterContainer.current.appendChild(frameImage);
-
         this.setState({ chapterEntries: [...chapterEntries, <ChapterItem
             key={currentCapture}
-            chapterPosterSrc={canvas.toDataURL()}
+            value={videoInfo.chapters[currentCapture].time}
+            posterSrc={canvas.toDataURL()}
+            chapterTitle={videoInfo.chapters[currentCapture].description}
+            onClick={this.setVideoProgress}
         />] });
         console.log(chapterEntries)
 
