@@ -1,4 +1,10 @@
 import React from "react";
+import { connect } from "react-redux";
+import {
+    setAutoPlay,
+    setChaptersOpen,
+    setVolume
+} from '../redux/actions';
 
 import { 
     AutoPlayBtn,
@@ -27,7 +33,7 @@ import {
 import Standard_Definition from '../assets/icons/standard_definition';
 import High_Definition from '../assets/icons/high_definition';
 
-export default class VideoPlayer extends React.Component {
+class VideoPlayer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -36,15 +42,13 @@ export default class VideoPlayer extends React.Component {
             activeVideoIndex: null,
             isActive: false,
             isPlaying: false,
-            isMuted: true,
-            autoPlay: true,
             idleTimer: null,
             isIdle: false,
-            volume: 1,
+            isMuted: true,
             isReadyToPlay: false,
             videoElapsedTime: 0,
             resolutionMenuOpen: false,
-            chaptersOpen: this.props.videoInfo.chapters?.length ? true : false,
+            chaptersOpen: this.props.videoInfo.chapters?.length && this.props.chaptersOpen ? true : false,
             miniPlayerMode: false,
             fullscreenMode: false,
             chapterEntries: [],
@@ -73,9 +77,12 @@ export default class VideoPlayer extends React.Component {
         if(prevState.activeVideoIndex !== this.state.activeVideoIndex) {
             this.handleActiveVideoIndexChange(prevState.videoElapsedTime, prevState.isPlaying);
         }
-        if (prevState.isReadyToPlay !== this.state.isReadyToPlay && (!this.state.isActive && this.state.autoPlay)) {
+        if (this.state.isReadyToPlay && !this.state.isActive && this.props.autoPlay) {
             this.startVideo();
         }
+        // if (prevState.isReadyToPlay !== this.state.isReadyToPlay && (!this.state.isActive && this.props.autoPlay)) {
+        //     this.startVideo();
+        // }
     }
 
     setActiveVideoIndex = () => {
@@ -142,7 +149,7 @@ export default class VideoPlayer extends React.Component {
         if(playMedia !== undefined) {
             playMedia.then(_ => {
                 videoPlayer.current.addEventListener('mousemove', this.handleIdle);
-                this.setState({ isActive:true });
+                this.setState({ isActive: true });
             })
             .catch(err => {
                 console.error('Error While Starting Video: ', err);
@@ -177,7 +184,9 @@ export default class VideoPlayer extends React.Component {
 
     handleVolumeChange = (event) => {
         const { volume, muted } = event.currentTarget;
-        this.setState({ volume, isMuted: muted });
+
+        this.props.updateVolume(volume);
+        this.setState({ isMuted: muted });
     }
 
     updateElapsedTime = (event) => {
@@ -206,6 +215,7 @@ export default class VideoPlayer extends React.Component {
     handleLoadedVideo = () => {
         this.setActiveThumbnail();
         const { media, videoElapsedTime, videoInfo, isActive, autoPlay, chapterEntries } = this.state;
+        media.current.volume = this.props.volume;
 
         if (videoInfo.chapters?.length > 0 && chapterEntries.length !== videoInfo.chapters.length) {
             media.current.addEventListener('seeked', this.captureChapterFrames);
@@ -279,24 +289,28 @@ export default class VideoPlayer extends React.Component {
     }
 
     render() {
+        const {
+            autoPlay,
+            updateAutoPlay,
+            chaptersOpen,
+            updateChaptersOpen,
+            volume
+        } = this.props;
         const { 
             videoInfo,
             activeThumbnail, 
             activeVideoIndex, 
-            autoPlay, 
             media, 
             videoPlayer, 
             volumeSlider,
             chapterContainer,
             isActive, 
-            isPlaying, 
+            isPlaying,
+            isMuted,
             miniPlayerMode, 
             videoElapsedTime, 
             isIdle, 
-            volume, 
-            isMuted, 
             resolutionMenuOpen,
-            chaptersOpen,
             isReadyToPlay,
             fullscreenMode,
             chapterEntries
@@ -308,12 +322,12 @@ export default class VideoPlayer extends React.Component {
             updateElapsedTime, 
             setVideoProgress, 
             copyToClipBoard, 
-            toggleVolume, 
             handleLoadedVideo, 
             handleVolumeChange, 
             HH_MM_SS, 
             setResolution,
-            toggleFullScreen
+            toggleFullScreen,
+            toggleVolume
         } = this;
         const { theaterMode, updateTheaterMode } = this.props;
 
@@ -360,7 +374,7 @@ export default class VideoPlayer extends React.Component {
                     isPlaying={isPlaying} 
                     isActive={isActive} 
                     autoPlay={autoPlay} 
-                    onClick={() => this.setState(prevState => ({ autoPlay: !prevState.autoPlay }))}
+                    onClick={() => updateAutoPlay(!autoPlay)}
                 />
                 <VideoChapters
                     ref={chapterContainer}
@@ -393,7 +407,7 @@ export default class VideoPlayer extends React.Component {
                         <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoInfo.metadata.duration)}`}</h1>
                     </div>
                     <div className="rightControls">
-                        <ToggleVideoChapters open={chaptersOpen} onClick={() => videoInfo.chapters?.length && this.setState(prevState => ({ chaptersOpen : !prevState.chaptersOpen }))}/>
+                        <ToggleVideoChapters open={chaptersOpen} onClick={() => videoInfo.chapters?.length && updateChaptersOpen(!chaptersOpen)}/>
                         <ResolutionSelection open={resolutionMenuOpen}>
                             <button
                                 title={'Video Quality'}
@@ -414,3 +428,21 @@ export default class VideoPlayer extends React.Component {
         </StyledVideoPlayer>);
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        autoPlay: state.userReducer.autoPlay,
+        volume: state.userReducer.volume,
+        chaptersOpen: state.userReducer.chaptersOpen
+    }
+}
+
+const mapDispatchToProps = (dispatch, getProps) => {
+    return {
+        updateAutoPlay: (value) => dispatch(setAutoPlay(value)),
+        updateVolume: (value) => dispatch(setVolume(value)),
+        updateChaptersOpen: (value) => dispatch(setChaptersOpen(value))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(VideoPlayer);
