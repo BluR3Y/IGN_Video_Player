@@ -5,6 +5,7 @@ export const deviceSizes = {
     minLaptop: '769',
     minDesktop: '1025',
     xlScreens: '1201',
+    xxlScreens: '1401'
 };
 
 export const breakPoints = {

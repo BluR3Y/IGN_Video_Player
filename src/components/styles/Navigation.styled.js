@@ -45,6 +45,7 @@ export const Nav_Container = styled.div`
     box-shadow: 0 1px #cdcdcd;
     user-select: none;
     flex: 0 0 auto;
+    z-index: 5;
 
     .navMain {
         display: flex;

@@ -33,7 +33,7 @@ export default class VideoPlayer extends React.Component {
         this.state = {
             videoInfo: this.props.videoInfo,
             activeThumbnail: null,
-            activeVideoIndex: 0,
+            activeVideoIndex: null,
             isActive: false,
             isPlaying: false,
             isMuted: true,
@@ -60,24 +60,12 @@ export default class VideoPlayer extends React.Component {
         if(this.state.videoInfo === null) {
             return;
         }
-        this.setActiveThumbnail();
-
+        this.setActiveVideoIndex();
         window.addEventListener('resize', this.setActiveThumbnail);
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.setActiveThumbnail);
-    }
-
-    componentDidMount() {
-        const {
-            videoInfo
-        } = this.state;
-
-        if (videoInfo === null) {
-            return;
-        }
-        this.setActiveThumbnail();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -88,6 +76,47 @@ export default class VideoPlayer extends React.Component {
         if (prevState.isReadyToPlay !== this.state.isReadyToPlay && (!this.state.isActive && this.state.autoPlay)) {
             this.startVideo();
         }
+    }
+
+    setActiveVideoIndex = () => {
+        const { videoInfo : { assets } } = this.state;
+        const { downlink, effectiveType } = navigator.connection;
+        const availableQuality = assets.reduce((accumulator, { height }) => {
+            switch (height) {
+                case 234:
+                    accumulator.push('very-low');
+                    break;
+                case 360:
+                    accumulator.push('low');
+                    break;
+                case 540:
+                    accumulator.push('medium');
+                    break;
+                case 720:
+                    accumulator.push('high');
+                    break;
+                case 1080:
+                    accumulator.push('very-high');
+                default:
+                    break;
+            }
+            return accumulator;
+        }, []);
+
+        var activeVideoIndex;
+        if (effectiveType === '4g' && downlink >= 8 && availableQuality.includes('very-high')) {
+            activeVideoIndex = availableQuality.indexOf('very-high');
+        } else if (effectiveType === '4g' && availableQuality.includes('high')) {
+            activeVideoIndex = availableQuality.indexOf('high');
+        } else if (downlink >= 6 && availableQuality.includes('medium')) {
+            activeVideoIndex = availableQuality.indexOf('medium');
+        } else if (downlink >= 4 && availableQuality.includes('low')) {
+            activeVideoIndex = availableQuality.indexOf('low');
+        } else {
+            activeVideoIndex = availableQuality.indexOf('very-low');
+        }
+
+        this.setState({ activeVideoIndex });
     }
 
     setActiveThumbnail = () => {
@@ -175,6 +204,7 @@ export default class VideoPlayer extends React.Component {
     }
 
     handleLoadedVideo = () => {
+        this.setActiveThumbnail();
         const { media, videoElapsedTime, videoInfo, isActive, autoPlay, chapterEntries } = this.state;
 
         if (videoInfo.chapters?.length > 0 && chapterEntries.length !== videoInfo.chapters.length) {
@@ -287,7 +317,7 @@ export default class VideoPlayer extends React.Component {
         } = this;
         const { theaterMode, updateTheaterMode } = this.props;
 
-        if(videoInfo === null) {
+        if(videoInfo === null || activeVideoIndex === null) {
             return <StyledLoadingVideoPlayer/>
         }
 

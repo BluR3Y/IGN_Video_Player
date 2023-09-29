@@ -85,10 +85,12 @@ export const StyledPlaylist = styled.div`
     flex: 1 1 auto;
     position: relative;
     display: grid;
-    padding: 20px 20px;
+    padding: 20px;
+    margin: auto;
     grid-template-columns: auto;
-    grid-template-rows: auto 1fr;
-    grid-row-gap: 20px;
+    grid-template-rows: auto auto 1fr;
+    grid-row-gap: 4px;
+    grid-column-gap: 0px;
 
     h1,
     h2,
@@ -97,57 +99,74 @@ export const StyledPlaylist = styled.div`
         color: ${props => props.theme.textColor};
     }
     
-    .activeVideo {
-        border: 2px solid blue;
+    ${StyledVideoPlayer} {
         grid-column: 1;
         grid-row: 1;
+    }
+    .videoInfo {
         font-size: 18px;
-        .videoInfo {
-            padding: 20px 0;
-            h1 {
-                font-size: 1.6em;
-                line-height: 1em;
-                margin-bottom: 10px;
-            }
-            h2 {
-                font-size: 1.2em;
-                font-weight: 500;
-                margin-bottom: 20px;
-                display: inline-block;
-            }
-            p {
-                font-size: 1em;
-                line-height: 1.4em;
-                margin-bottom: 15px;
-            }
+        grid-column: 1;
+        grid-row: 2;
+        padding: 20px 0;
+        h1 {
+            font-size: 1.6em;
+            line-height: 1em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        p {
+            font-size: 1em;
+            line-height: 1.4em;
+            margin-bottom: 15px;
         }
     }
     ${StyledVideoQueue} {
         grid-column: 1;
-        grid-row: 2;
+        grid-row: 3;
     }
     ${StyledArticleList} {
         grid-column: 1;
-        grid-row: 3;
+        grid-row: 4;
         border: 2px solid green;
     }
 
     @media (min-width: ${deviceSizes.minDesktop}px) {
+        grid-template-columns: 660px 1fr;
+        grid-column-gap: 25px;
         ${props => props.inTheaterMode ? css `
+            padding: 0;
+
             ${StyledVideoPlayer} {
                 max-height: 72vh;
+                grid-column: 1 / -1;
+                grid-row: 1;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .videoInfo {
+                gird-column: 1;
+                grid-row: 2;
+                margin-left: 30px;
+            }
+
+            ${StyledVideoQueue} {
+                grid-column: 2;
+                grid-row: 2 / -1;
+                margin-right: 30px;
+            }
+            
+            ${StyledArticleList} {
+                grid-column: 1;
+                grid-row: 3;
+                margin-left: 30px;
             }
         ` : css `
-                padding: 20px 100px;
-                grid-gap: 25px;
-                grid-template-columns: 550px 1fr;
-                grid-template-rows: auto 1fr;
-
-                .activeVideo {
-                    grid-column: 1;
-                    grid-row: 1;
-                }
-
                 ${StyledVideoQueue} {
                     grid-column: 2;
                     grid-row: 1 / -1;
@@ -155,22 +174,20 @@ export const StyledPlaylist = styled.div`
 
                 ${StyledArticleList} {
                     grid-column: 1;
-                    grid-row: 2;
+                    grid-row: 3;
                 }
         `}
     }
 
     @media (min-width: ${deviceSizes.xlScreens}px) {
-        ${props => props.inTheaterMode ? css `
-            
-        ` : css `
-            padding: 20px 120px;
-            grid-template-columns: 1fr 410px;
+        grid-template-columns: 1fr 410px;
+        ${props => !props.inTheaterMode && css `
+            padding: 20px 100px;
         `}
     }
 
     @media (max-width: ${deviceSizes.minDesktop}px) {
-        .activeVideo {
+        ${StyledVideoPlayer} {
             ${TheaterModeBtn} {
                 display: none;
             }

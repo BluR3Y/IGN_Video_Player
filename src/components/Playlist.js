@@ -204,7 +204,7 @@ export default class Playlist extends React.Component {
         } = this;
         const activeVideo = activeVideoIndex !== null ? videos[activeVideoIndex] : null;
         return <StyledPlaylist inTheaterMode={theaterMode}>
-            {activeVideo && (
+            {/* {activeVideo && (
                 <div className="activeVideo">
                     <VideoPlayer
                         videoInfo={activeVideo}
@@ -223,7 +223,25 @@ export default class Playlist extends React.Component {
                         ) }
                     </div>
                 </div>
-            )}
+            )} */}
+            {activeVideo && <>
+                <VideoPlayer
+                    videoInfo={activeVideo}
+                    theaterMode={theaterMode}
+                    updateTheaterMode={toggleTheaterMode}
+                />
+                <div className="videoInfo">
+                    <h1>{videos[activeVideoIndex].metadata.title}</h1>
+                    <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
+                    <CommentCount count={videos[activeVideoIndex].commentCount} />
+                    <p>{activeVideoDescription}</p>
+                    { activeVideo.tags?.length && (
+                        <VideoTags>
+                            { activeVideo.tags.map((item, index) => (<li key={index}>{item}</li>)) }
+                        </VideoTags>
+                    ) }
+                </div>
+            </>}
             { videos && (
                 <VideoQueue videos={videos} activeVideoIndex={activeVideoIndex}/>
             ) }
