@@ -6,7 +6,7 @@ import VideoPlayer from "./VideoPlayer";
 import VideoQueue from "./VideoQueue";
 import ArticleList from './ArticleList';
 
-import { CommentCount, StyledPlaylist, StyledTimeStamps, VideoTags } from './styles/Playlist.styled';
+import { CommentCount, StyledPlaylist, VideoTags } from './styles/Playlist.styled';
 
 import Videos from '../data/videos.json';
 import Articles from '../data/articles.json';
@@ -21,8 +21,8 @@ export default class Playlist extends React.Component {
             activeVideoDescription: null,
             activeVideoTimeStamps: null,
             activeVideoComments: null,
-            timeStampFrames: null,
             componentError: false,
+            theaterMode: false
         }
     }
 
@@ -64,7 +64,7 @@ export default class Playlist extends React.Component {
         return Articles;
     }
 
-    // IGN deciding to remove their public api required that I use 'unique' methods to tretrieve their content
+    // IGN deciding to remove their public api which required that I use 'unique' methods to tretrieve their content
     generateMissingVideoData = (videoInfo) => ({
         ...videoInfo,
         commentCount: Math.floor(Math.random() * 200),
@@ -78,6 +78,24 @@ export default class Playlist extends React.Component {
             for (var i = 0; i < 15; i++)
                 tags.push(faker.lorem.word());
             return tags;
+        })(),
+        chapters: (() => {
+            const chapters = [];
+            const avgLength = videoInfo.metadata.duration / Math.floor(Math.random() * 10);
+            var prevTime = 0;
+            while (prevTime < videoInfo.metadata.duration) {
+                const newTime = Math.floor(Math.random() * avgLength) + prevTime;
+                if (newTime >= videoInfo.metadata.duration) {
+                    break;
+                }
+
+                chapters.push({
+                    time: newTime,
+                    description: faker.lorem.paragraph(5)
+                });
+                prevTime = newTime;
+            }
+            return chapters;
         })()
     });
 
@@ -165,23 +183,38 @@ export default class Playlist extends React.Component {
         return activeVideoComments;
     }
 
+    toggleTheaterMode = () => {
+        this.setState(prevState => ({ theaterMode: !prevState.theaterMode }));
+        console.log(this.state.theaterMode)
+    }
+
     render() {
-        const { videos, articles, activeVideoIndex, activeVideoDescription, activeVideoComments, timeStampFrames, componentError } = this.state;
-        const { convertTimestamp } = this;
+        const { 
+            videos,
+            articles,
+            activeVideoIndex,
+            activeVideoDescription,
+            activeVideoComments,
+            componentError,
+            theaterMode
+        } = this.state;
+        const {
+            convertTimestamp,
+            toggleTheaterMode
+        } = this;
         const activeVideo = activeVideoIndex !== null ? videos[activeVideoIndex] : null;
-        return <StyledPlaylist>
+        return <StyledPlaylist inTheaterMode={theaterMode}>
             {activeVideo && (
                 <div className="activeVideo">
-                    <VideoPlayer videoInfo={activeVideo} />
+                    <VideoPlayer
+                        videoInfo={activeVideo}
+                        theaterMode={theaterMode}
+                        updateTheaterMode={toggleTheaterMode}
+                    />
                     <div className="videoInfo">
                         <h1>{videos[activeVideoIndex].metadata.title}</h1>
                         <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
                         <CommentCount count={videos[activeVideoIndex].commentCount} />
-                        {timeStampFrames && (
-                            <StyledTimeStamps>
-                                {timeStampFrames.map((image, index) => (<img src={image} key={index} />))}
-                            </StyledTimeStamps>
-                        )}
                         <p>{activeVideoDescription}</p>
                         { activeVideo.tags?.length && (
                             <VideoTags>
@@ -192,9 +225,9 @@ export default class Playlist extends React.Component {
                 </div>
             )}
             { videos && (
-                <VideoQueue videos={videos} activeIndex={activeVideoIndex}/>
+                <VideoQueue videos={videos} activeVideoIndex={activeVideoIndex}/>
             ) }
-            {/* <ArticleList/> */}
+            <ArticleList/>
         </StyledPlaylist>
     }
 }

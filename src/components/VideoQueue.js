@@ -35,17 +35,26 @@ export default class VideoQueue extends React.Component {
         super(props);
         this.state = {
             videos: this.props.videos,
-            activeVideo: this.props.videos[0]
+            activeVideo: this.props.videos[props.activeVideoIndex]
         }
     }
 
     componentDidMount() {
-        console.log(this.state.videos)
+        console.log(this.state.videos.length)
     }
 
     render() {
         return(<StyledVideoQueue>
             <div className="videoList">
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
+                <QueueVideo videoInfo={this.state.activeVideo}/>
                 <QueueVideo videoInfo={this.state.activeVideo}/>
             </div>
         </StyledVideoQueue>);

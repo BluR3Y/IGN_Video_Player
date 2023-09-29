@@ -44,9 +44,8 @@ export default class VideoPlayer extends React.Component {
             isReadyToPlay: false,
             videoElapsedTime: 0,
             resolutionMenuOpen: false,
-            chaptersOpen: true,
+            chaptersOpen: this.props.videoInfo.chapters?.length ? true : false,
             miniPlayerMode: false,
-            theaterMode: false,
             fullscreenMode: false,
             chapterEntries: [],
             videoPlayer: React.createRef(),
@@ -232,7 +231,6 @@ export default class VideoPlayer extends React.Component {
             chapterTitle={videoInfo.chapters[currentCapture].description}
             onClick={this.setVideoProgress}
         />] });
-        console.log(chapterEntries)
 
         if (++currentCapture < videoInfo.chapters.length) {
             media.current.currentTime = videoInfo.chapters[currentCapture].time;
@@ -261,7 +259,6 @@ export default class VideoPlayer extends React.Component {
             volumeSlider,
             chapterContainer,
             isActive, 
-            theaterMode, 
             isPlaying, 
             miniPlayerMode, 
             videoElapsedTime, 
@@ -288,6 +285,7 @@ export default class VideoPlayer extends React.Component {
             setResolution,
             toggleFullScreen
         } = this;
+        const { theaterMode, updateTheaterMode } = this.props;
 
         if(videoInfo === null) {
             return <StyledLoadingVideoPlayer/>
@@ -365,7 +363,7 @@ export default class VideoPlayer extends React.Component {
                         <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoInfo.metadata.duration)}`}</h1>
                     </div>
                     <div className="rightControls">
-                        <ToggleVideoChapters open={chaptersOpen} onClick={() => this.setState(prevState => ({ chaptersOpen : !prevState.chaptersOpen }))}/>
+                        <ToggleVideoChapters open={chaptersOpen} onClick={() => videoInfo.chapters?.length && this.setState(prevState => ({ chaptersOpen : !prevState.chaptersOpen }))}/>
                         <ResolutionSelection open={resolutionMenuOpen}>
                             <button
                                 title={'Video Quality'}
@@ -378,7 +376,7 @@ export default class VideoPlayer extends React.Component {
                             </ResolutionForm>
                         </ResolutionSelection>
                         <MiniPlayerBtn onClick={() => this.setState(prevState => ({ miniPlayerMode : !prevState.miniPlayerMode }))} />
-                        <TheaterModeBtn activeMode={theaterMode} onClick={() => this.setState(prevState => ({ theaterMode: !prevState.theaterMode}))}/>
+                        <TheaterModeBtn activeMode={theaterMode} onClick={updateTheaterMode}/>
                         <ToggleFullScreen activeMode={fullscreenMode} onClick={toggleFullScreen} />
                     </div>
                 </MainControls>

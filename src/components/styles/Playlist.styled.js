@@ -1,8 +1,9 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import {deviceSizes} from './breakPoints';
 import { StyledVideoQueue } from "./VideoQueue.styled";
 import {StyledArticleList} from './ArticleList.styled';
+import { TheaterModeBtn, StyledVideoPlayer } from "./VideoPlayer.styled";
 import Comment from '../../assets/icons/comment';
 
 // export const VideoQueue = styled.div`
@@ -97,6 +98,7 @@ export const StyledPlaylist = styled.div`
     }
     
     .activeVideo {
+        border: 2px solid blue;
         grid-column: 1;
         grid-row: 1;
         font-size: 18px;
@@ -127,37 +129,52 @@ export const StyledPlaylist = styled.div`
     ${StyledArticleList} {
         grid-column: 1;
         grid-row: 3;
+        border: 2px solid green;
+    }
+
+    @media (min-width: ${deviceSizes.minDesktop}px) {
+        ${props => props.inTheaterMode ? css `
+            ${StyledVideoPlayer} {
+                max-height: 72vh;
+            }
+        ` : css `
+                padding: 20px 100px;
+                grid-gap: 25px;
+                grid-template-columns: 550px 1fr;
+                grid-template-rows: auto 1fr;
+
+                .activeVideo {
+                    grid-column: 1;
+                    grid-row: 1;
+                }
+
+                ${StyledVideoQueue} {
+                    grid-column: 2;
+                    grid-row: 1 / -1;
+                }
+
+                ${StyledArticleList} {
+                    grid-column: 1;
+                    grid-row: 2;
+                }
+        `}
     }
 
     @media (min-width: ${deviceSizes.xlScreens}px) {
-        padding: 20px 120px;
-        grid-template-columns: 1fr 250px;
-        grid-template-rows: auto 1fr;
-        grid-gap: 25px;
-
-        .activeVideo {
-            grid-column: 1;
-            grid-row: 1;
-        }
-
-        ${StyledVideoQueue} {
-            grid-column: 2;
-            grid-row: 1 / -1;
-        }
-
-        ${StyledArticleList} {
-            grid-column: 1;
-            grid-row: 2;
-        }
+        ${props => props.inTheaterMode ? css `
+            
+        ` : css `
+            padding: 20px 120px;
+            grid-template-columns: 1fr 410px;
+        `}
     }
-`;
 
-export const StyledTimeStamps = styled.div`
-    width: inherit;
-
-    img {
-        width: 100%;
-        border: 1px solid red;
+    @media (max-width: ${deviceSizes.minDesktop}px) {
+        .activeVideo {
+            ${TheaterModeBtn} {
+                display: none;
+            }
+        }
     }
 `;
 

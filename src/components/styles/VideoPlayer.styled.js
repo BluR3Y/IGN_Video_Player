@@ -619,7 +619,7 @@ export const TheaterModeBtn = styled.button.attrs((props) => ({
     </div>),
     title: (props.activeMode ? 'Default View' : 'Theater Mode')
 }))`
-
+    
     div {
         width: 45px;
         height: 27px;
