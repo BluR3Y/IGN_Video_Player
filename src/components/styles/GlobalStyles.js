@@ -62,7 +62,7 @@ const GlobalStyles = createGlobalStyle`
     body {
         font-family: 'Poppins', sans-serif;
         font-size: 1.15em;
-        background-color: ${props => props.theme.type === 'classic' ? '#f6f8f7' : '#202634'};
+        background-color: ${props => props.theme.background};
     }
 
     #root {

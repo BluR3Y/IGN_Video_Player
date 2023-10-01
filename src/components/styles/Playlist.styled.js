@@ -19,7 +19,7 @@ export const StyledPlaylist = styled.div`
     h2,
     p,
     li {
-        color: ${props => props.theme.textColor};
+        color: ${props => props.theme.text};
     }
     
     ${StyledVideoPlayer} {
@@ -96,7 +96,7 @@ export const CommentCount = styled.div.attrs((props) => ({
 
     svg {
         height: inherit;
-        fill: ${props => props.theme.textColor};
+        fill: ${props => props.theme.text};
         margin-right: 7px;
     }
     h1 {

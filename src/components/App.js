@@ -17,7 +17,8 @@ export default class App extends React.Component {
                     secondary: '#ffffff',
                     tertiary: '#bbc4c4',
                     quaternary: '#41495a',
-                    textColor: '#181c25'
+                    text: '#181c25',
+                    background: '#f6f8f7'
                 },
                 dark: {
                     type: 'dark',
@@ -25,7 +26,8 @@ export default class App extends React.Component {
                     secondary: '#41495a',
                     tertiary: '#bbc4c4',
                     quaternary: '#ffffff',
-                    textColor: '#f6f8f7'
+                    text: '#f6f8f7',
+                    background: '#202634'
                 }
             },
             activeTheme: 'dark',
