@@ -1,33 +1,42 @@
 import React from "react";
 import $ from "jquery";
 import { faker } from '@faker-js/faker';
+import { connect } from "react-redux";
 
 import VideoPlayer from "./VideoPlayer";
-import VideoQueue from "./VideoQueue";
-import ArticleList from './ArticleList';
+// import VideoQueue from "./VideoQueue";
+// import ArticleList from './ArticleList';
+
+import { setActiveVideoIndex } from '../redux/actions';
 
 import { CommentCount, StyledPlaylist, VideoTags } from './styles/Playlist.styled';
+import { deviceSizes } from './styles/breakPoints';
 
 import Videos from '../data/videos.json';
 import Articles from '../data/articles.json';
+import ContentSelection from "./ContentSelection";
+import CommentSection from "./CommentSection";
 
-export default class Playlist extends React.Component {
+class Playlist extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             articles: null,
             videos: null,
-            activeVideoIndex: null,
-            activeVideoDescription: null,
-            activeVideoTimeStamps: null,
+            activeVideoTimeStamps: [],
+            formattedVideoDescription: null,
             activeVideoComments: null,
             componentError: false,
-            theaterMode: false
+            theaterMode: false,
+            toggleableTheaterMode: null,
+            videoChapters: [],
+            toggleableVideoChapters: null,
+            extendedContentList: false,
         }
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if(prevState.activeVideoIndex !== this.state.activeVideoIndex) {
+        if(prevProps.activeVideoIndex !== this.props.activeVideoIndex) {
             this.findTimeStamps();
             this.setVideoComments();
         }
@@ -39,8 +48,7 @@ export default class Playlist extends React.Component {
         Promise.all([
             this.fetchVideos()
             .then(videos => this.setState({
-                videos: videos.map(item => this.generateMissingVideoData(item)),
-                activeVideoIndex: 0
+                videos: videos.map(item => this.generateMissingVideoData(item))
             })),
             this.fetchArticles()
             .then(articles => this.setState({
@@ -54,6 +62,8 @@ export default class Playlist extends React.Component {
             console.error('Error occured while fetching content: ', err);
             this.setState({ componentError: err });
         });
+        window.addEventListener('load', this.resolutionBasedAdjustments);
+        window.addEventListener('resize', this.resolutionBasedAdjustments);
     }
 
     fetchVideos = async (startIndex = 0, count = 5) => {
@@ -62,6 +72,15 @@ export default class Playlist extends React.Component {
 
     fetchArticles = async (startIndex = 0, count = 10) => {
         return Articles;
+    }
+
+    resolutionBasedAdjustments = () => {
+        const currentWidth = window.innerWidth;
+
+        this.setState({
+            toggleableVideoChapters: currentWidth >= 560,
+            toggleableTheaterMode: currentWidth >= deviceSizes.minDesktop
+        })
     }
 
     // IGN deciding to remove their public api which required that I use 'unique' methods to tretrieve their content
@@ -100,30 +119,31 @@ export default class Playlist extends React.Component {
     });
 
     findTimeStamps = async () => {
-        const { videos, activeVideoIndex } = this.state;
+        const { videos } = this.state;
+        const { activeVideoIndex } = this.props;
         const videoInfo = videos[activeVideoIndex];
-        var activeVideoDescription = videoInfo['metadata'].description || '';
-        var activeVideoTimeStamps = this.getTimeStamps(activeVideoDescription);
+        var formattedVideoDescription = videoInfo['metadata'].description || '';
+        var activeVideoTimeStamps = this.getTimeStamps(formattedVideoDescription);
 
         if(activeVideoTimeStamps) {
-            activeVideoDescription = activeVideoDescription.substring(0, activeVideoDescription.indexOf(activeVideoTimeStamps[0].timestamp)) + 
-            activeVideoDescription.substring(activeVideoDescription.indexOf(activeVideoTimeStamps[activeVideoTimeStamps.length-1].title)+activeVideoTimeStamps[activeVideoTimeStamps.length-1].title.length);            
+            formattedVideoDescription = formattedVideoDescription.substring(0, formattedVideoDescription.indexOf(activeVideoTimeStamps[0].timestamp)) + 
+            formattedVideoDescription.substring(formattedVideoDescription.indexOf(activeVideoTimeStamps[activeVideoTimeStamps.length-1].title)+activeVideoTimeStamps[activeVideoTimeStamps.length-1].title.length);            
         }
-        this.setState({ activeVideoDescription, activeVideoTimeStamps });
+        this.setState({ formattedVideoDescription, activeVideoTimeStamps });
     }
 
     getTimeStamps = (str) => {
         var timeStamps = [];
         var lastTSIndex = null;
         var lastTimeStamp = null;
-        for(var i =0; i < str.length-4; i++) {
+        for(let i =0; i < str.length-4; i++) {
             if(!isNaN(parseFloat(str[i]))) {
                 var j = i+1;
                 for(; j < str.length && ((/^\d+$/).test(str[j]) || str[j] === ':'); j++);
                 var subStr = str.substring(i,j);
                 if(this.isTimeStamp(subStr)) {
                     if(lastTSIndex) {
-                        var prevTitle = str.substring(lastTSIndex, i);
+                        let prevTitle = str.substring(lastTSIndex, i);
                         if(prevTitle[0] === ' ')
                             prevTitle = prevTitle.substring(1);
                         if(prevTitle[prevTitle.length-1] === ' ')
@@ -139,8 +159,8 @@ export default class Playlist extends React.Component {
             }
         }
         if(lastTSIndex) {
-            var prevTitle = '';
-            for(var i = lastTSIndex + 1; i < str.length; i++) {
+            let prevTitle = '';
+            for(let i = lastTSIndex + 1; i < str.length; i++) {
                 if(
                     prevTitle.length &&
                     str[i].match(/^[A-Z]*$/) &&
@@ -183,69 +203,83 @@ export default class Playlist extends React.Component {
         return activeVideoComments;
     }
 
-    toggleTheaterMode = () => {
-        this.setState(prevState => ({ theaterMode: !prevState.theaterMode }));
-        console.log(this.state.theaterMode)
-    }
-
     render() {
+        const {
+            activeVideoIndex,
+            updateActiveVideoIndex
+        } = this.props;
         const { 
             videos,
             articles,
-            activeVideoIndex,
-            activeVideoDescription,
+            activeVideoTimeStamps,
+            formattedVideoDescription,
             activeVideoComments,
             componentError,
-            theaterMode
+            toggleableTheaterMode,
+            theaterMode,
+            videoChapters,
+            toggleableVideoChapters
+            // extendedContentList
         } = this.state;
         const {
-            convertTimestamp,
-            toggleTheaterMode
+            convertTimestamp
         } = this;
-        const activeVideo = activeVideoIndex !== null ? videos[activeVideoIndex] : null;
-        return <StyledPlaylist inTheaterMode={theaterMode}>
-            {/* {activeVideo && (
-                <div className="activeVideo">
-                    <VideoPlayer
-                        videoInfo={activeVideo}
-                        theaterMode={theaterMode}
-                        updateTheaterMode={toggleTheaterMode}
-                    />
-                    <div className="videoInfo">
-                        <h1>{videos[activeVideoIndex].metadata.title}</h1>
-                        <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
-                        <CommentCount count={videos[activeVideoIndex].commentCount} />
-                        <p>{activeVideoDescription}</p>
-                        { activeVideo.tags?.length && (
-                            <VideoTags>
-                                { activeVideo.tags.map((item, index) => (<li key={index}>{item}</li>)) }
-                            </VideoTags>
-                        ) }
-                    </div>
-                </div>
-            )} */}
-            {activeVideo && <>
-                <VideoPlayer
-                    videoInfo={activeVideo}
-                    theaterMode={theaterMode}
-                    updateTheaterMode={toggleTheaterMode}
-                />
-                <div className="videoInfo">
-                    <h1>{videos[activeVideoIndex].metadata.title}</h1>
-                    <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
-                    <CommentCount count={videos[activeVideoIndex].commentCount} />
-                    <p>{activeVideoDescription}</p>
-                    { activeVideo.tags?.length && (
-                        <VideoTags>
-                            { activeVideo.tags.map((item, index) => (<li key={index}>{item}</li>)) }
-                        </VideoTags>
-                    ) }
-                </div>
-            </>}
-            { videos && (
-                <VideoQueue videos={videos} activeVideoIndex={activeVideoIndex}/>
-            ) }
-            <ArticleList/>
+
+        if (videos === null || articles === null) {
+            return <h1>Ipsum Lorem</h1> // creating Loading component for Playlist
+        }
+
+        return <StyledPlaylist 
+            theaterMode={theaterMode}
+            // extendedContentList={extendedContentList}
+        >
+            <VideoPlayer
+                videoInfo={videos[activeVideoIndex]}
+                toggleableTheaterMode={toggleableTheaterMode}
+                theaterMode={theaterMode}
+                updateTheaterMode={() => this.setState(prevState => ({ theaterMode: !prevState.theaterMode }))}
+                toggleableVideoChapters={toggleableVideoChapters}
+                videoChapters={videoChapters}
+                updateVideoChapters={(chapterEntries) => this.setState({ videoChapters: chapterEntries })}
+            />
+            <div className="videoInfo">
+                <h1>{videos[activeVideoIndex].metadata.title}</h1>
+                <h2>Published: <span>{convertTimestamp(videos[activeVideoIndex].metadata.publishDate)}</span></h2>
+                <CommentCount count={videos[activeVideoIndex].commentCount} />
+                <p>{activeVideoTimeStamps.length ? formattedVideoDescription : videos[activeVideoIndex].metadata.description}</p>
+                { videos[activeVideoIndex].tags?.length && (
+                    <VideoTags>
+                        { videos[activeVideoIndex].tags.map((item, index) => (<li key={index}>{item}</li>)) }
+                    </VideoTags>
+                ) }
+                {/* Implement alternative video chapters */}
+            </div>
+            <ContentSelection
+                videos={videos}
+                articles={articles}
+                activeVideoIndex={activeVideoIndex}
+                updateActiveVideoIndex={updateActiveVideoIndex}
+                // extendedContentList={extendedContentList}
+                // updateExtendedContentList={() => this.setState(prevState => ({ extendedContentList: !prevState.extendedContentList }))}
+                inTheaterMode={theaterMode}
+            />
+            <CommentSection>
+
+            </CommentSection>
         </StyledPlaylist>
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        activeVideoIndex: state.userReducer.activeVideoIndex
+    }
+}
+
+const mapDispatchToProps = (dispatch, getProps) => {
+    return {
+        updateActiveVideoIndex: (value) => dispatch(setActiveVideoIndex(value))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

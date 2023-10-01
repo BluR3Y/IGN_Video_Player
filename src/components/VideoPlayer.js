@@ -48,10 +48,9 @@ class VideoPlayer extends React.Component {
             isReadyToPlay: false,
             videoElapsedTime: 0,
             resolutionMenuOpen: false,
-            chaptersOpen: this.props.videoInfo.chapters?.length && this.props.chaptersOpen ? true : false,
+            // chaptersOpen: this.props.videoInfo.chapters?.length && this.props.chaptersOpen ? true : false,
             miniPlayerMode: false,
             fullscreenMode: false,
-            chapterEntries: [],
             videoPlayer: React.createRef(),
             progressBar: React.createRef(),
             volumeSlider: React.createRef(),
@@ -214,10 +213,11 @@ class VideoPlayer extends React.Component {
 
     handleLoadedVideo = () => {
         this.setActiveThumbnail();
-        const { media, videoElapsedTime, videoInfo, isActive, autoPlay, chapterEntries } = this.state;
+        const { media, videoElapsedTime, videoInfo, isActive, autoPlay } = this.state;
+        const { videoChapters, updateVideoChapters } = this.props;
         media.current.volume = this.props.volume;
 
-        if (videoInfo.chapters?.length > 0 && chapterEntries.length !== videoInfo.chapters.length) {
+        if (updateVideoChapters && videoInfo.chapters?.length > 0 && videoChapters.length !== videoInfo.chapters.length) {
             media.current.addEventListener('seeked', this.captureChapterFrames);
             media.current.currentTime = videoInfo.chapters[0].time;
         } else {
@@ -253,24 +253,26 @@ class VideoPlayer extends React.Component {
         // this.setState({ idleTimer, isIdle });
     }
 
+    // Modify#2
     captureChapterFrames = () => {
         // Take into account invalid times
-        const { media, videoInfo, chapterEntries } = this.state;
+        const { media, videoInfo } = this.state;
+        const { videoChapters } = this.props;
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        var currentCapture = chapterEntries.length;
+        var currentCapture = videoChapters.length;
 
         canvas.width = media.current.videoWidth;
         canvas.height = media.current.videoHeight;
         context.drawImage(media.current, 0, 0, canvas.width, canvas.height);
 
-        this.setState({ chapterEntries: [...chapterEntries, <ChapterItem
+        this.props.updateVideoChapters([...videoChapters, <ChapterItem
             key={currentCapture}
             value={videoInfo.chapters[currentCapture].time}
             posterSrc={canvas.toDataURL()}
             chapterTitle={videoInfo.chapters[currentCapture].description}
             onClick={this.setVideoProgress}
-        />] });
+        />])
 
         if (++currentCapture < videoInfo.chapters.length) {
             media.current.currentTime = videoInfo.chapters[currentCapture].time;
@@ -294,7 +296,8 @@ class VideoPlayer extends React.Component {
             updateAutoPlay,
             chaptersOpen,
             updateChaptersOpen,
-            volume
+            volume,
+            videoChapters
         } = this.props;
         const { 
             videoInfo,
@@ -312,8 +315,7 @@ class VideoPlayer extends React.Component {
             isIdle, 
             resolutionMenuOpen,
             isReadyToPlay,
-            fullscreenMode,
-            chapterEntries
+            fullscreenMode
         } = this.state;
         const { 
             startVideo, 
@@ -329,7 +331,12 @@ class VideoPlayer extends React.Component {
             toggleFullScreen,
             toggleVolume
         } = this;
-        const { theaterMode, updateTheaterMode } = this.props;
+        const {
+            theaterMode,
+            updateTheaterMode,
+            toggleableTheaterMode,
+            toggleableVideoChapters
+        } = this.props;
 
         if(videoInfo === null || activeVideoIndex === null) {
             return <StyledLoadingVideoPlayer/>
@@ -378,8 +385,8 @@ class VideoPlayer extends React.Component {
                 />
                 <VideoChapters
                     ref={chapterContainer}
-                    isOpen={chaptersOpen}
-                >{chapterEntries}</VideoChapters>
+                    isOpen={ toggleableVideoChapters && chaptersOpen}
+                >{videoChapters}</VideoChapters>
                 <RangeSlider
                     min='0'
                     max={videoInfo.metadata.duration}
@@ -407,7 +414,10 @@ class VideoPlayer extends React.Component {
                         <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoInfo.metadata.duration)}`}</h1>
                     </div>
                     <div className="rightControls">
-                        <ToggleVideoChapters open={chaptersOpen} onClick={() => videoInfo.chapters?.length && updateChaptersOpen(!chaptersOpen)}/>
+                        { toggleableVideoChapters && videoChapters.length && <ToggleVideoChapters
+                            open={chaptersOpen}
+                            onClick={() => updateChaptersOpen(!chaptersOpen)}
+                        /> }
                         <ResolutionSelection open={resolutionMenuOpen}>
                             <button
                                 title={'Video Quality'}
@@ -420,7 +430,7 @@ class VideoPlayer extends React.Component {
                             </ResolutionForm>
                         </ResolutionSelection>
                         <MiniPlayerBtn onClick={() => this.setState(prevState => ({ miniPlayerMode : !prevState.miniPlayerMode }))} />
-                        <TheaterModeBtn activeMode={theaterMode} onClick={updateTheaterMode}/>
+                        { toggleableTheaterMode && <TheaterModeBtn activeMode={theaterMode} onClick={updateTheaterMode} /> }
                         <ToggleFullScreen activeMode={fullscreenMode} onClick={toggleFullScreen} />
                     </div>
                 </MainControls>

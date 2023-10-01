@@ -1,85 +1,8 @@
 import styled, { css } from "styled-components";
 
 import {deviceSizes} from './breakPoints';
-import { StyledVideoQueue } from "./VideoQueue.styled";
-import {StyledArticleList} from './ArticleList.styled';
 import { TheaterModeBtn, StyledVideoPlayer } from "./VideoPlayer.styled";
 import Comment from '../../assets/icons/comment';
-
-// export const VideoQueue = styled.div`
-//     position: relative;
-//     border: 1px solid green;
-
-// `;
-
-// export const ArticleList = styled.div`
-//     background-color: blue;
-//     height: fit-content;
-// `;
-
-// export const StyledPlaylist = styled.div`
-//     width: inherit;
-//     flex: 1 1 auto;
-//     position: relative;
-//     padding: 20px 15px;
-//     display: grid;
-//     grid-template-columns: auto;
-//     grid-template-rows: repeat(3, auto);
-
-//     h1,
-//     p {
-//         color: ${props => props.theme.textColor};
-//     }
-
-//     .activeVideo {
-//         grid-column: 1;
-//         grid-row: 1;
-        
-//         h1 {
-//             font-size: 1.4em;
-//             line-height: 1em;
-//             margin: 30px 0 15px 0;
-//         }
-//         p {
-//             font-size: 1em;
-//             line-height: 1.4em;
-//         }
-//     }
-//     ${VideoQueue} {
-//         grid-column: 1;
-//         grid-row: 2;
-//     }
-//     ${ArticleList} {
-//         grid-column: 1;
-//         grid-row: 3;
-//     }
-
-//     @media (min-width: 770px) {
-//         padding: 20px 40px;
-//     }
-
-//     @media (min-width: ${deviceSizes.xlScreens}px) {
-//         padding: 20px 120px;
-//         grid-template-columns: 1fr 250px;
-//         grid-template-rows: auto 1fr;
-//         grid-gap: 25px;
-
-//         .activeVideo {
-//             grid-column: 1;
-//             grid-row: 1;
-//         }
-
-//         ${VideoQueue} {
-//             grid-column: 2;
-//             grid-row: 1 / -1;
-//         }
-
-//         ${ArticleList} {
-//             grid-column: 1;
-//             grid-row: 2;
-//         }
-//     }
-// `;
 
 export const StyledPlaylist = styled.div`
     flex: 1 1 auto;
@@ -125,22 +48,13 @@ export const StyledPlaylist = styled.div`
             margin-bottom: 15px;
         }
     }
-    ${StyledVideoQueue} {
-        grid-column: 1;
-        grid-row: 3;
-    }
-    ${StyledArticleList} {
-        grid-column: 1;
-        grid-row: 4;
-        border: 2px solid green;
-    }
-
+    
     @media (min-width: ${deviceSizes.minDesktop}px) {
         grid-template-columns: 660px 1fr;
         grid-column-gap: 25px;
-        ${props => props.inTheaterMode ? css `
-            padding: 0;
 
+        ${props => props.theaterMode && css`
+            padding: 0;
             ${StyledVideoPlayer} {
                 max-height: 72vh;
                 grid-column: 1 / -1;
@@ -154,45 +68,17 @@ export const StyledPlaylist = styled.div`
                 grid-row: 2;
                 margin-left: 30px;
             }
-
-            ${StyledVideoQueue} {
-                grid-column: 2;
-                grid-row: 2 / -1;
-                margin-right: 30px;
-            }
-            
-            ${StyledArticleList} {
-                grid-column: 1;
-                grid-row: 3;
-                margin-left: 30px;
-            }
-        ` : css `
-                ${StyledVideoQueue} {
-                    grid-column: 2;
-                    grid-row: 1 / -1;
-                }
-
-                ${StyledArticleList} {
-                    grid-column: 1;
-                    grid-row: 3;
-                }
         `}
     }
 
     @media (min-width: ${deviceSizes.xlScreens}px) {
         grid-template-columns: 1fr 410px;
-        ${props => !props.inTheaterMode && css `
+        ${props => !props.theaterMode && css `
             padding: 20px 100px;
         `}
     }
 
-    @media (max-width: ${deviceSizes.minDesktop}px) {
-        ${StyledVideoPlayer} {
-            ${TheaterModeBtn} {
-                display: none;
-            }
-        }
-    }
+    /* Needs Modification */
 `;
 
 export const CommentCount = styled.div.attrs((props) => ({
