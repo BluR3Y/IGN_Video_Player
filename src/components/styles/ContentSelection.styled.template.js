@@ -116,20 +116,6 @@ export const StyledContentSelection = styled.div`
     grid-column: 1;
     grid-row: 3;
 
-    @media (min-width: ${deviceSizes.minDesktop}px) {
-        grid-column: 2;
-        ${props => props.inTheaterMode ? css`
-            grid-row: 2 / -1;
-        ` : css`
-            ${props.extendedContentList ? css`
-                grid-row: 1 / -1;
-            ` : css`
-                grid-row: 1;
-            `}
-        `}
-
-    }
-
     .typeSelection {
         flex: 0 0 40px;
         width: 300px;
@@ -161,6 +147,20 @@ export const StyledContentSelection = styled.div`
         background-color: ${props => props.theme.primary};
         border-radius: 5px;
         color: ${props => props.theme.tertiary};
+    }
+
+    @media (min-width: ${deviceSizes.minDesktop}px) {
+        grid-column: 2;
+        ${props => props.inTheaterMode ? css`
+            grid-row: 2 / -1;
+        ` : css`
+            ${props.extendedContentList ? css`
+                grid-row: 1 / -1;
+            ` : css`
+                grid-row: 1;
+            `}
+        `}
+
     }
 `;
 

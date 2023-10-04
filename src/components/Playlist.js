@@ -14,8 +14,8 @@ import { deviceSizes } from './styles/breakPoints';
 
 import Videos from '../data/videos.json';
 import Articles from '../data/articles.json';
-import ContentSelection from "./ContentSelection";
 import CommentSection from "./CommentSection";
+import VideoQueue from "./VideoQueue";
 
 class Playlist extends React.Component {
     constructor(props) {
@@ -90,7 +90,8 @@ class Playlist extends React.Component {
         metadata: {
             ...videoInfo.metadata,
             description: faker.lorem.paragraph(10),
-            publishDate: faker.date.anytime()
+            publishDate: faker.date.anytime(),
+            author: faker.person.fullName()
         },
         tags: (() => {
             const tags = [];
@@ -254,13 +255,10 @@ class Playlist extends React.Component {
                 ) }
                 {/* Implement alternative video chapters */}
             </div>
-            <ContentSelection
+            <VideoQueue
                 videos={videos}
-                articles={articles}
                 activeVideoIndex={activeVideoIndex}
                 updateActiveVideoIndex={updateActiveVideoIndex}
-                // extendedContentList={extendedContentList}
-                // updateExtendedContentList={() => this.setState(prevState => ({ extendedContentList: !prevState.extendedContentList }))}
                 inTheaterMode={theaterMode}
             />
             {/* <CommentSection
