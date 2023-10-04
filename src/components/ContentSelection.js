@@ -81,20 +81,19 @@ class ArticleContentItem extends React.Component {
             <div className="contentInfo">
                 <h1>{contentInfo.content.title}</h1>
                 <h2>{contentInfo.content.subtitle}</h2>
-                <div className="additionalContentInfo">
-                    <div>
-                        {getEntertainmentTypeIcon(contentInfo.content.primaryObject.type)}
-                        <h1>{contentInfo.content.primaryObject.type}</h1>
-                    </div>
-                    <div>
-                        <User/>
-                        <h1>{contentInfo.content.contributors[0].name}</h1>
-                    </div>
-                    <div>
-                        <Comment/>
-                        <h1>32</h1>
-                        {/* Generate random number of comments */}
-                    </div>
+            </div>
+            <div className="additionalContentInfo">
+                <div>
+                    {getEntertainmentTypeIcon(contentInfo.content.primaryObject.type)}
+                    <h1>{contentInfo.content.primaryObject.type}</h1>
+                </div>
+                <div>
+                    <User/>
+                    <h1>{contentInfo.content.contributors[0].name}</h1>
+                </div>
+                <div>
+                    <Comment/>
+                    <h1>{contentInfo.commentCount}</h1>
                 </div>
             </div>
         </StyledArticleContentItem>

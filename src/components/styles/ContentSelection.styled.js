@@ -1,6 +1,110 @@
 import styled, { css } from "styled-components";
 import { deviceSizes } from "./breakPoints";
 
+export const StyledArticleContentItem = styled.a.attrs((props) => ({
+    href: 'https://ign.com' + props.contentUrl
+}))`
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 100px auto;
+    grid-gap: 10px;
+    font-size: 0.8em;
+    text-decoration: none;
+
+    .posterContainer {
+        background-color: #000;
+        grid-column: 1;
+        grid-row: 1;
+        aspect-ratio: 16 / 9;
+        border-radius: 6px;
+        overflow: hidden;
+
+        img {
+            height: 100%;
+            width: 100%;
+        }
+    }
+
+    .contentInfo {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: 1em;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+
+        h1 {
+            font-size: 0.95em;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            -webkit-box-orient: vertical;
+        }
+        h2 {
+            font-weight: 400;
+            font-size: 0.9em;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            -webkit-box-orient: vertical;
+        }
+    }
+
+    .additionalContentInfo {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        display: flex;
+        flex-direction: row;
+        font-size: 1em;
+        gap: 25px;
+
+        div {
+            font-size: 0.8em;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+
+            svg {
+                fill: ${props => props.theme.tertiary};
+                height: 1.2em;
+            }
+            h1 {
+                font-size: 0.9em;
+                line-height: 1.8em;
+                color: ${props => props.theme.tertiary};
+            }
+        }
+    }
+
+    @media (min-width: ${deviceSizes.minTablet}px) {
+        grid-template-columns: 220px 1fr;
+        grid-template-rows: auto auto;
+        grid-row-gap: 5px;
+
+        .posterContainer {
+            grid-column: 1;
+            grid-row: 1 / -1;
+        }
+
+        .contentInfo {
+            align-self: flex-end;
+        }
+
+        .additionalContentInfo {
+            grid-column: 2;
+            align-self: flex-start;
+        }
+    }
+`;
+
 export const StyledContentSelection = styled.div`
     display: flex;
     flex-direction: column;
@@ -10,6 +114,7 @@ export const StyledContentSelection = styled.div`
     gap: 10px;
     grid-column: 1;
     grid-row: 3;
+    overflow: hidden;
 
     @media (min-width: ${deviceSizes.minDesktop}px) {
         grid-column: 2;
@@ -37,11 +142,18 @@ export const StyledContentSelection = styled.div`
     }
 
     .contentWrapper {
-        background-color: ${props => props.theme.secondary};
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
         gap: 1px;
+
+
+        ${StyledArticleContentItem} {
+            padding: 15px 0;
+        }
+        ${StyledArticleContentItem}:not(:last-child) {
+            border-bottom: 1px solid ${props => props.theme.tertiary};
+        }
     }
 
     .extendList {
@@ -69,78 +181,6 @@ export const ContentSelectionBtn = styled.button`
     }
     &:hover {
         background-color: ${props => props.theme.tertiary};
-    }
-`;
-
-export const StyledArticleContentItem = styled.a.attrs((props) => ({
-    href: 'https://ign.com' + props.contentUrl
-}))`
-    height: 120px;
-    display: flex;
-    flex-direction: row;
-    background-color: ${props => props.theme.background};    
-    padding: 10px 0;
-    gap: 15px;
-    font-size: 0.82em;
-    text-decoration: none;
-    
-    .posterContainer {
-        background-color: black;
-        height: 100%;
-        aspect-ratio: 1.8;
-        border-radius: 6px;
-        overflow: hidden;
-        flex: 0 0 auto;
-
-        img {
-            height: 100%;
-            width: 100%;
-        }
-    }
-
-    .contentInfo {
-        flex: 1 1 auto;
-        font-size: 1em;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-        overflow: hidden;
-
-        h1 {
-            font-size: 1em;
-        }
-        h2 {
-            font-weight: 400;
-            font-size: 0.9em;
-        }
-
-        .additionalContentInfo {
-            display: flex;
-            flex-direction: row;
-            font-size: 1em;
-            height: 1.2em;
-            gap: 25px;
-
-            div {
-                font-size: 0.8em;
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 5px;
-                overflow: hidden;
-
-                svg {
-                    fill: ${props => props.theme.tertiary};
-                    height: 1.2em;
-                }
-                h1 {
-                    font-size: 0.9em;
-                    line-height: 2em;
-                    color: ${props => props.theme.tertiary};
-                }
-            }
-        }
     }
 `;
 
