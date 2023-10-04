@@ -263,11 +263,11 @@ class Playlist extends React.Component {
                 // updateExtendedContentList={() => this.setState(prevState => ({ extendedContentList: !prevState.extendedContentList }))}
                 inTheaterMode={theaterMode}
             />
-            <CommentSection
+            {/* <CommentSection
                 inTheaterMode={theaterMode}
             >
 
-            </CommentSection>
+            </CommentSection> */}
         </StyledPlaylist>
     }
 }

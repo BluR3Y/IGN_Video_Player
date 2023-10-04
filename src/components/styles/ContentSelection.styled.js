@@ -62,6 +62,7 @@ export const StyledArticleContentItem = styled.a.attrs((props) => ({
         flex-direction: row;
         font-size: 1em;
         gap: 25px;
+        overflow: hidden;
 
         div {
             font-size: 0.8em;
@@ -114,7 +115,6 @@ export const StyledContentSelection = styled.div`
     gap: 10px;
     grid-column: 1;
     grid-row: 3;
-    overflow: hidden;
 
     @media (min-width: ${deviceSizes.minDesktop}px) {
         grid-column: 2;
@@ -142,10 +142,10 @@ export const StyledContentSelection = styled.div`
     }
 
     .contentWrapper {
-        flex: 1 1 auto;
-        min-height: 0;
+        flex: 1 1 0;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
         gap: 1px;
 
         ${StyledArticleContentItem} {
@@ -154,7 +154,6 @@ export const StyledContentSelection = styled.div`
         ${StyledArticleContentItem}:not(:last-child) {
             border-bottom: 1px solid ${props => props.theme.tertiary};
         }
-        border: 1px solid blue;
     }
 
     .extendList {
@@ -163,7 +162,6 @@ export const StyledContentSelection = styled.div`
         border-radius: 5px;
         color: ${props => props.theme.tertiary};
     }
-    border: 1px solid red;
 `;
 
 export const ContentSelectionBtn = styled.button`

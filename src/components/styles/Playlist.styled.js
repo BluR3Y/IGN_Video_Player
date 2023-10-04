@@ -14,7 +14,6 @@ export const StyledPlaylist = styled.div`
     grid-template-rows: repeat(4, auto);
     grid-row-gap: 4px;
     grid-column-gap: 0px;
-    min-height: 0;
 
     h1,
     h2,
@@ -74,7 +73,7 @@ export const StyledPlaylist = styled.div`
     }
 
     @media (min-width: ${deviceSizes.xlScreens}px) {
-        grid-template-columns: 1fr 410px;
+        grid-template-columns: 1fr 450px;
         ${props => !props.theaterMode && css `
             padding: 20px 100px;
         `}
