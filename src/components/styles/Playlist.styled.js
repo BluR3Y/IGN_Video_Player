@@ -11,9 +11,10 @@ export const StyledPlaylist = styled.div`
     padding: 20px;
     margin: auto;
     grid-template-columns: auto;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: repeat(4, auto);
     grid-row-gap: 4px;
     grid-column-gap: 0px;
+    min-height: 0;
 
     h1,
     h2,
@@ -51,6 +52,7 @@ export const StyledPlaylist = styled.div`
     
     @media (min-width: ${deviceSizes.minDesktop}px) {
         grid-template-columns: 660px 1fr;
+        grid-template-rows: repeat(3, auto);
         grid-column-gap: 25px;
 
         ${props => props.theaterMode && css`

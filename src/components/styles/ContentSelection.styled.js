@@ -131,7 +131,7 @@ export const StyledContentSelection = styled.div`
     }
 
     .typeSelection {
-        height: 40px;
+        flex: 0 0 40px;
         width: 300px;
         align-self: flex-start;
         display: flex;
@@ -143,10 +143,10 @@ export const StyledContentSelection = styled.div`
 
     .contentWrapper {
         flex: 1 1 auto;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         gap: 1px;
-
 
         ${StyledArticleContentItem} {
             padding: 15px 0;
@@ -154,14 +154,16 @@ export const StyledContentSelection = styled.div`
         ${StyledArticleContentItem}:not(:last-child) {
             border-bottom: 1px solid ${props => props.theme.tertiary};
         }
+        border: 1px solid blue;
     }
 
     .extendList {
-        height: 30px;
+        flex: 0 0 30px;
         background-color: ${props => props.theme.primary};
         border-radius: 5px;
         color: ${props => props.theme.tertiary};
     }
+    border: 1px solid red;
 `;
 
 export const ContentSelectionBtn = styled.button`

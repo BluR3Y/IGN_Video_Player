@@ -347,7 +347,6 @@ class VideoPlayer extends React.Component {
             idle={isIdle}   
             isReadyToPlay={isReadyToPlay}
             miniPlayerMode={miniPlayerMode}
-            aspectRatio={videoInfo['assets'][activeVideoIndex].width / videoInfo['assets'][activeVideoIndex].height}
         >
             <Header isActive={isActive} >
                 <a href={videoInfo['assets'][activeVideoIndex].url}>{videoInfo.metadata.title}</a>

@@ -16,13 +16,13 @@ import Book_Open from "../../assets/icons/book_open";
 
 export const StyledVideoPlayer = styled.div`
     width: 100%;
-    height: fit-content;
+    height: min-content;
     background-color: black;
     position: relative;
     overflow: hidden;
     border-radius: 10px;
     user-select: none;
-    aspect-ratio: ${props => props.aspectRatio};
+    aspect-ratio: 16 / 9;
     display: flex;
 
     video {
