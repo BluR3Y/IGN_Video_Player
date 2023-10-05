@@ -37,7 +37,6 @@ class VideoPlayer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            videoInfo: this.props.videoInfo,
             activeThumbnail: null,
             activeVideoIndex: null,
             isActive: false,
@@ -48,7 +47,6 @@ class VideoPlayer extends React.Component {
             isReadyToPlay: false,
             videoElapsedTime: 0,
             resolutionMenuOpen: false,
-            // chaptersOpen: this.props.videoInfo.chapters?.length && this.props.chaptersOpen ? true : false,
             miniPlayerMode: false,
             fullscreenMode: false,
             videoPlayer: React.createRef(),
@@ -60,9 +58,6 @@ class VideoPlayer extends React.Component {
     }
 
     componentDidMount() {
-        if(this.state.videoInfo === null) {
-            return;
-        }
         this.setActiveVideoIndex();
         window.addEventListener('resize', this.setActiveThumbnail);
     }
@@ -85,9 +80,9 @@ class VideoPlayer extends React.Component {
     }
 
     setActiveVideoIndex = () => {
-        const { videoInfo : { assets } } = this.state;
+        const { videoQualities } = this.props;
         const { downlink, effectiveType } = navigator.connection;
-        const availableQuality = assets.reduce((accumulator, { height }) => {
+        const availableQuality = videoQualities.reduce((accumulator, { height }) => {
             switch (height) {
                 case 234:
                     accumulator.push('very-low');
@@ -126,14 +121,14 @@ class VideoPlayer extends React.Component {
     }
 
     setActiveThumbnail = () => {
-        const { videoPlayer, videoInfo } = this.state;
+        const { videoThumbnails } = this.props;
+        const { videoPlayer } = this.state;
         var pixelCount = videoPlayer.current.clientHeight * videoPlayer.current.clientWidth;
-        var thumbnails = videoInfo['thumbnails'];
-        var activeThumbnail = thumbnails[0];
-        for(var i = 0; i < thumbnails.length; i++) {
-            if(thumbnails[i].height + thumbnails[i].width > pixelCount)
+        var activeThumbnail = videoThumbnails[0];
+        for(var i = 0; i < videoThumbnails.length; i++) {
+            if(videoThumbnails[i].height + videoThumbnails[i].width > pixelCount)
                 break;
-            activeThumbnail = thumbnails[i];
+            activeThumbnail = videoThumbnails[i];
         }
         this.setState({ activeThumbnail });
     }
@@ -213,13 +208,13 @@ class VideoPlayer extends React.Component {
 
     handleLoadedVideo = () => {
         this.setActiveThumbnail();
-        const { media, videoElapsedTime, videoInfo, isActive, autoPlay } = this.state;
-        const { videoChapters, updateVideoChapters } = this.props;
+        const { videoChapters, chapterCaptures, updateChapterCaptures } = this.props;
+        const { media, videoElapsedTime, isActive, autoPlay } = this.state;
         media.current.volume = this.props.volume;
 
-        if (updateVideoChapters && videoInfo.chapters?.length > 0 && videoChapters.length !== videoInfo.chapters.length) {
+        if (updateChapterCaptures && videoChapters?.length && chapterCaptures.length !== videoChapters.length) {
             media.current.addEventListener('seeked', this.captureChapterFrames);
-            media.current.currentTime = videoInfo.chapters[0].time;
+            media.current.currentTime = videoChapters[0].time;
         } else {
             this.setState({ isReadyToPlay: true });
         }
@@ -255,34 +250,35 @@ class VideoPlayer extends React.Component {
 
     // Modify#2
     captureChapterFrames = () => {
-        // Take into account invalid times
-        const { media, videoInfo } = this.state;
-        const { videoChapters } = this.props;
+        // take into account invalid times
+        const { media } = this.state;
+        const { videoChapters, chapterCaptures, updateChapterCaptures } = this.props;
+
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        var currentCapture = videoChapters.length;
+        var currentCapture = chapterCaptures.length;
 
         canvas.width = media.current.videoWidth;
         canvas.height = media.current.videoHeight;
         context.drawImage(media.current, 0, 0, canvas.width, canvas.height);
-
-        this.props.updateVideoChapters([...videoChapters, <ChapterItem
+        console.log(chapterCaptures)
+        updateChapterCaptures([...chapterCaptures, <ChapterItem
             key={currentCapture}
-            value={videoInfo.chapters[currentCapture].time}
+            value={videoChapters[currentCapture].time}
             posterSrc={canvas.toDataURL()}
-            chapterTitle={videoInfo.chapters[currentCapture].description}
+            chapterTitle={videoChapters[currentCapture].description}
             onClick={this.setVideoProgress}
         />])
 
-        if (++currentCapture < videoInfo.chapters.length) {
-            media.current.currentTime = videoInfo.chapters[currentCapture].time;
+        if (++currentCapture < videoChapters.length) {
+            media.current.currentTime = videoChapters[currentCapture].time;
         } else {
             media.current.removeEventListener('seeked', this.captureChapterFrames);
             media.current.currentTime = 0;
             this.setState({ isReadyToPlay: true });
         }
     }
-
+    
     HH_MM_SS = seconds => {
         return (seconds < 3600 ? 
             new Date(seconds * 1000).toISOString().substring(14, 19) :
@@ -297,10 +293,18 @@ class VideoPlayer extends React.Component {
             chaptersOpen,
             updateChaptersOpen,
             volume,
-            videoChapters
+            videoQualities,
+            videoThumbnails,
+            videoTitle,
+            videoUrl,
+            videoDuration,
+            chapterCaptures,
+            theaterMode,
+            updateTheaterMode,
+            toggleableTheaterMode,
+            toggleableVideoChapters
         } = this.props;
         const { 
-            videoInfo,
             activeThumbnail, 
             activeVideoIndex, 
             media, 
@@ -326,19 +330,13 @@ class VideoPlayer extends React.Component {
             copyToClipBoard, 
             handleLoadedVideo, 
             handleVolumeChange, 
-            HH_MM_SS, 
             setResolution,
             toggleFullScreen,
-            toggleVolume
+            toggleVolume,
+            HH_MM_SS
         } = this;
-        const {
-            theaterMode,
-            updateTheaterMode,
-            toggleableTheaterMode,
-            toggleableVideoChapters
-        } = this.props;
 
-        if(videoInfo === null || activeVideoIndex === null) {
+        if(activeVideoIndex === null) {
             return <StyledLoadingVideoPlayer/>
         }
 
@@ -349,12 +347,12 @@ class VideoPlayer extends React.Component {
             miniPlayerMode={miniPlayerMode}
         >
             <Header isActive={isActive} >
-                <a href={videoInfo['assets'][activeVideoIndex].url}>{videoInfo.metadata.title}</a>
+                <a href={videoUrl}>{videoTitle}</a>
                 <ShareVideoBtn onClick={copyToClipBoard} />
             </Header>
             <Thumbnail 
                 thumbnail={activeThumbnail}
-                duration={this.HH_MM_SS(videoInfo.metadata.duration)}
+                duration={HH_MM_SS(videoDuration)}
                 onClick={startVideo}
                 isActive={isActive}
             />
@@ -371,8 +369,8 @@ class VideoPlayer extends React.Component {
                 onPause={() => this.setState({ isPlaying: false })}
             >
                 <source
-                    src={videoInfo['assets'][activeVideoIndex].url}
-                    type={`video/${videoInfo['assets'][activeVideoIndex].url.split('.').pop()}`}
+                    src={videoQualities[activeVideoIndex].url}
+                    type={`video/${videoQualities[activeVideoIndex].url.split('.').pop()}`}
                 />
             </video>
             <Controls isActive={isActive}>
@@ -382,14 +380,14 @@ class VideoPlayer extends React.Component {
                     autoPlay={autoPlay} 
                     onClick={() => updateAutoPlay(!autoPlay)}
                 />
-                <VideoChapters
+                { chapterCaptures.length !== 0 && <VideoChapters
                     ref={chapterContainer}
-                    isOpen={ toggleableVideoChapters && chaptersOpen}
-                >{videoChapters}</VideoChapters>
+                    isOpen={chaptersOpen}    
+                >{chapterCaptures}</VideoChapters> }
                 <RangeSlider
                     min='0'
-                    max={videoInfo.metadata.duration}
-                    step={videoInfo.metadata.duration / 1000}
+                    max={videoDuration}
+                    step={videoDuration / 1000}
                     value={videoElapsedTime}
                     onInput={setVideoProgress}
                     onMouseDown={() => media.current.pause()}
@@ -410,10 +408,10 @@ class VideoPlayer extends React.Component {
                                 ref={volumeSlider}
                             />
                         </div>
-                        <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoInfo.metadata.duration)}`}</h1>
+                        <h1>{`${HH_MM_SS(videoElapsedTime)} / ${HH_MM_SS(videoDuration)}`}</h1>
                     </div>
                     <div className="rightControls">
-                        { toggleableVideoChapters && videoChapters.length && <ToggleVideoChapters
+                        { toggleableVideoChapters && chapterCaptures.length !== 0 && <ToggleVideoChapters
                             open={chaptersOpen}
                             onClick={() => updateChaptersOpen(!chaptersOpen)}
                         /> }
@@ -421,9 +419,9 @@ class VideoPlayer extends React.Component {
                             <button
                                 title={'Video Quality'}
                                 onClick={() => this.setState(prevState => ({ resolutionMenuOpen: !prevState.resolutionMenuOpen }))}
-                            >{videoInfo['assets'][activeVideoIndex].height > 540 ? <High_Definition/> : <Standard_Definition/>}</button>
+                            >{videoQualities[activeVideoIndex].height > 540 ? <High_Definition/> : <Standard_Definition/>}</button>
                             <ResolutionForm onChange={setResolution}>
-                                {videoInfo['assets'].map((item, index) => (<ResolutionInput 
+                                {videoQualities.map((item, index) => (<ResolutionInput 
                                     itemProps={item} key={index} value={index} checked={activeVideoIndex === index} 
                                 />))}
                             </ResolutionForm>

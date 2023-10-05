@@ -29,7 +29,7 @@ class Playlist extends React.Component {
             componentError: false,
             theaterMode: false,
             toggleableTheaterMode: null,
-            videoChapters: [],
+            chapterCaptures: [],
             toggleableVideoChapters: null,
             extendedContentList: false,
         }
@@ -218,7 +218,7 @@ class Playlist extends React.Component {
             componentError,
             toggleableTheaterMode,
             theaterMode,
-            videoChapters,
+            chapterCaptures,
             toggleableVideoChapters
             // extendedContentList
         } = this.state;
@@ -235,13 +235,18 @@ class Playlist extends React.Component {
             // extendedContentList={extendedContentList}
         >
             <VideoPlayer
-                videoInfo={videos[activeVideoIndex]}
+                videoQualities={videos[activeVideoIndex].assets}
+                videoThumbnails={videos[activeVideoIndex].thumbnails}
+                videoTitle={videos[activeVideoIndex].metadata.title}
+                videoUrl={videos[activeVideoIndex].metadata.url}
+                videoDuration={videos[activeVideoIndex].metadata.duration}
                 toggleableTheaterMode={toggleableTheaterMode}
                 theaterMode={theaterMode}
                 updateTheaterMode={() => this.setState(prevState => ({ theaterMode: !prevState.theaterMode }))}
                 toggleableVideoChapters={toggleableVideoChapters}
-                videoChapters={videoChapters}
-                updateVideoChapters={(chapterEntries) => this.setState({ videoChapters: chapterEntries })}
+                videoChapters={videos[activeVideoIndex].chapters}
+                chapterCaptures={chapterCaptures}
+                updateChapterCaptures={(chapterEntries) => this.setState({ chapterCaptures: chapterEntries })}
             />
             <div className="videoInfo">
                 <h1>{videos[activeVideoIndex].metadata.title}</h1>
