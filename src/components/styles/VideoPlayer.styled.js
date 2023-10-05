@@ -14,38 +14,6 @@ import Compress from '../../assets/icons/compress';
 import Book_Close from "../../assets/icons/book_close";
 import Book_Open from "../../assets/icons/book_open";
 
-export const StyledVideoPlayer = styled.div`
-    width: 100%;
-    height: min-content;
-    background-color: black;
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    user-select: none;
-    aspect-ratio: 16 / 9;
-    display: flex;
-
-    video {
-        width: 100%;
-        height: auto;
-        display: block;
-        visibility: ${props => props.isReadyToPlay ? 'visible' : 'hidden'};
-    }
-
-    ${props => props.idle && css`
-        *:not(video) {
-            display: none;
-        }
-    `}
-
-    ${props => props.miniPlayerMode && css`
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        width: 50vw;
-    `}
-`;
-
 export const StyledLoadingVideoPlayer = styled.div`
     border: 1px solid red;
     aspect-ratio: 2;
@@ -146,14 +114,6 @@ export const Header = styled.div`
     a:hover {
         text-decoration: underline;
     }
-    ${props => props.isActive && css`
-        background-image: linear-gradient(to bottom, black 0%, transparent 100%);
-        opacity: 0;
-        transition: opacity 0.10s linear;
-        ${StyledVideoPlayer}:hover & {
-            opacity: 1;
-        }
-    `}
 `;
 
 export const ShareVideoBtn = styled.button.attrs(() => ({
@@ -188,12 +148,12 @@ export const Thumbnail = styled.div.attrs((props) => ({
     top: 0;
     width: 100%;
     height: 100%;
-    display: ${props => props.isActive ? 'none' : 'flex'};
     align-items: center;
     justify-content: center;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
+    display: flex;
     z-index: 1;
     background: ${props => props.thumbnail ? `linear-gradient( rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) ), center / cover no-repeat url(${props.thumbnail.url})` : null};
 
@@ -254,12 +214,6 @@ export const Controls = styled.div`
     .progressBar:hover {
         height: 5px;
     }
-
-    ${props => props.isActive && css`
-        ${StyledVideoPlayer}:hover & {
-            visibility: visible;
-        }
-    `}
 `;  
 
 export const AutoPlayBtn = styled.button.attrs((props) => ({
@@ -662,4 +616,79 @@ export const ToggleFullScreen = styled.button.attrs((props) => ({
         height: inherit;
         fill: #fff;
     }
+`;
+
+export const StyledVideoPlayer = styled.div.attrs((props) => ({
+    children: (props.miniPlayerMode ? <div className="miniPlayerWrapper">{props.children}</div> : props.children)
+}))`
+    width: 100%;
+    height: min-content;
+    background-color: black;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    user-select: none;
+    aspect-ratio: 16 / 9;
+    display: flex;
+
+    .miniPlayerWrapper {
+        width: 400px;
+        overflow: hidden;
+        aspect-ratio: inherit;
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .miniPlayerToggle {
+        width: 100%;
+        height: 100%;
+        position: static;
+        left: 0;
+        top: 0;
+
+        background-color: red;
+    }
+
+    video {
+        width: 100%;
+        height: auto;
+        display: block;
+        visibility: ${props => props.isReadyToPlay ? 'visible' : 'hidden'};
+    }
+
+    ${props => props.idle && css`
+        *:not(video) {
+            display: none;
+        }
+    `}
+
+    ${props => props.isActive && css`
+        ${Header} {
+            background-image: linear-gradient(to bottom, black 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.10s linear;
+        }
+
+        ${Thumbnail} {
+            display: none;
+        }
+
+        ${props.miniPlayerMode ? css`
+            .miniPlayerWrapper:hover > ${Controls} {
+                visibility: visible;
+            }
+            .miniPlayerWrapper:hover > ${Header} {
+                opacity: 1;
+            }
+        ` : css`
+            &:hover > ${Controls} {
+                visibility: visible;
+            }
+            &:hover > ${Header} {
+                opacity: 1;
+            }
+        `}
+    `}
 `;

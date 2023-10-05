@@ -342,11 +342,13 @@ class VideoPlayer extends React.Component {
 
         return(<StyledVideoPlayer 
             ref={videoPlayer} 
-            idle={isIdle}   
+            idle={isIdle}
+            isActive={isActive}
             isReadyToPlay={isReadyToPlay}
             miniPlayerMode={miniPlayerMode}
         >
-            <Header isActive={isActive} >
+            {!isReadyToPlay && <StyledVideoPlayerLoading/>}
+            <Header>
                 <a href={videoUrl}>{videoTitle}</a>
                 <ShareVideoBtn onClick={copyToClipBoard} />
             </Header>
@@ -354,9 +356,7 @@ class VideoPlayer extends React.Component {
                 thumbnail={activeThumbnail}
                 duration={HH_MM_SS(videoDuration)}
                 onClick={startVideo}
-                isActive={isActive}
             />
-            {!isReadyToPlay && <StyledVideoPlayerLoading/>}
             <video 
                 ref={media} 
                 onClick={playPauseMedia}
@@ -373,14 +373,14 @@ class VideoPlayer extends React.Component {
                     type={`video/${videoQualities[activeVideoIndex].url.split('.').pop()}`}
                 />
             </video>
-            <Controls isActive={isActive}>
+            <Controls>
                 <AutoPlayBtn 
                     isPlaying={isPlaying} 
                     isActive={isActive} 
                     autoPlay={autoPlay} 
                     onClick={() => updateAutoPlay(!autoPlay)}
                 />
-                { chapterCaptures.length !== 0 && <VideoChapters
+                { toggleableVideoChapters &&chapterCaptures.length !== 0 && <VideoChapters
                     ref={chapterContainer}
                     isOpen={chaptersOpen}    
                 >{chapterCaptures}</VideoChapters> }
